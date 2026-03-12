@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Calendar, CheckCircle2, AlertCircle, Clock, ChevronLeft, ChevronRight, FileText, UserPlus, Sparkles } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Calendar, CheckCircle2, AlertCircle, Clock, ChevronLeft, ChevronRight, FileText, UserPlus, Sparkles, TrendingUp, PhoneCall } from 'lucide-react'
 
 const allAppointments = [
   { time: '9:00 AM', name: 'Rahul Mehta', age: '28M', type: 'General', status: 'Completed', symptoms: 'Routine checkup' },
@@ -13,8 +14,16 @@ const allAppointments = [
 ]
 
 export default function DoctorDashboard() {
+  const router = useRouter()
   const [date, setDate] = useState('Friday, March 13')
   const [toggle, setToggle] = useState(true)
+  const [appointments, setAppointments] = useState(allAppointments)
+
+  const callIn = (targetName: string) => {
+    setAppointments(prev => prev.map(a =>
+      a.name === targetName ? { ...a, status: 'In Consultation' } : a
+    ))
+  }
 
   return (
     <div className="p-6">
@@ -42,31 +51,40 @@ export default function DoctorDashboard() {
 
       {/* Metric Cards */}
       <div className="grid grid-cols-3 gap-5 mb-6">
-        <div className="card p-4 flex items-center gap-4">
+        <div className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
           <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center shrink-0">
             <UserPlus className="w-5 h-5 text-primary" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="text-2xl font-bold text-text-primary">18</p>
             <p className="text-xs text-text-secondary">Today's Patients</p>
+            <p className="text-xs font-medium text-success flex items-center gap-0.5 mt-0.5">
+              <TrendingUp className="w-3 h-3" /> +3 vs yesterday
+            </p>
           </div>
         </div>
-        <div className="card p-4 flex items-center gap-4">
+        <div className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
           <div className="w-10 h-10 rounded-xl bg-success-light flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-5 h-5 text-success" />
           </div>
-          <div>
-            <p className="text-2xl font-bold text-success-text">11</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-2xl font-bold text-success-text">
+              {appointments.filter(a => a.status === 'Completed').length}
+            </p>
             <p className="text-xs text-text-secondary">Completed</p>
+            <p className="text-xs text-success font-medium mt-0.5">61% completion rate</p>
           </div>
         </div>
-        <div className="card p-4 flex items-center gap-4">
+        <div className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
           <div className="w-10 h-10 rounded-xl bg-warning-light flex items-center justify-center shrink-0">
             <Clock className="w-5 h-5 text-warning" />
           </div>
-          <div>
-            <p className="text-2xl font-bold text-warning-text">7</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-2xl font-bold text-warning-text">
+              {appointments.filter(a => a.status === 'Waiting').length}
+            </p>
             <p className="text-xs text-text-secondary">Remaining</p>
+            <p className="text-xs text-text-muted mt-0.5">Avg wait 12 min</p>
           </div>
         </div>
       </div>
@@ -99,12 +117,12 @@ export default function DoctorDashboard() {
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3 pt-4 border-t border-brand-border">
-              <Link href="/doctor/consultation" className="btn-primary py-2.5 flex justify-center items-center gap-2">
-                <FileText className="w-4 h-4" /> Open Notes & Prescription
+              <Link href="/doctor/consultation" className="btn-primary py-2.5 flex justify-center items-center gap-2 hover:scale-[1.01] transition-transform">
+                <FileText className="w-4 h-4" /> Open Notes &amp; Prescription
               </Link>
-              <button className="btn-outline py-2.5 flex justify-center items-center gap-2 text-primary hover:bg-primary-light border-primary/30">
+              <Link href="/doctor/patients" className="btn-outline py-2.5 flex justify-center items-center gap-2 text-primary hover:bg-primary-light border-primary/30">
                 <Calendar className="w-4 h-4" /> Patient History
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -122,7 +140,12 @@ export default function DoctorDashboard() {
                   <p className="text-sm text-text-secondary">10:00 AM · Back pain</p>
                 </div>
               </div>
-              <button className="text-sm font-medium text-primary hover:text-primary-hover">Call In</button>
+              <button
+                onClick={() => callIn('Amit Kumar')}
+                className="text-sm font-medium text-white bg-primary px-3 py-1.5 rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-1.5"
+              >
+                <PhoneCall className="w-3.5 h-3.5" /> Call In
+              </button>
             </div>
           </div>
         </div>
@@ -135,7 +158,7 @@ export default function DoctorDashboard() {
           </div>
           
           <div className="flex-1 overflow-y-auto p-4 space-y-0">
-            {allAppointments.map((app, i) => (
+            {appointments.map((app, i) => (
               <div key={app.time} className="relative pl-6 pb-6 last:pb-0">
                 {/* Timeline line */}
                 {i < allAppointments.length - 1 && (

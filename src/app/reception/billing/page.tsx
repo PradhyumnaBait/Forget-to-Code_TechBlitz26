@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, IndianRupee, Plus, Printer, CheckCircle, Calculator, Smartphone, MapPin } from 'lucide-react'
+import { FileText, IndianRupee, Plus, Printer, CheckCircle, Smartphone, Trash2, MessageSquare } from 'lucide-react'
 
 interface Item {
   id: string
@@ -26,10 +26,33 @@ export default function BillingPage() {
   const [discount, setDiscount] = useState(0)
   const [payMode, setPayMode] = useState<'upi' | 'cash'>('upi')
   const [received, setReceived] = useState('700')
+  const [sent, setSent] = useState(false)
 
   const subtotal = items.reduce((acc, curr) => acc + (curr.price * curr.qty), 0)
   const total = subtotal - discount
   const change = payMode === 'cash' ? Math.max(0, parseInt(received || '0') - total) : 0
+
+  const addItem = () => {
+    const newId = String(Date.now())
+    setItems(prev => [...prev, { id: newId, name: 'New Item', qty: 1, price: 0 }])
+  }
+
+  const removeItem = (id: string) => setItems(prev => prev.filter(i => i.id !== id))
+
+  const updateItem = (id: string, field: keyof Item, value: string) => {
+    setItems(prev => prev.map(item => {
+      if (item.id !== id) return item
+      if (field === 'qty' || field === 'price') return { ...item, [field]: Math.max(0, Number(value) || 0) }
+      return { ...item, [field]: value }
+    }))
+  }
+
+  const handlePrint = () => window.print()
+
+  const handleSendDigital = () => {
+    setSent(true)
+    setTimeout(() => setSent(false), 3000)
+  }
 
   return (
     <div className="p-6">
@@ -60,18 +83,44 @@ export default function BillingPage() {
             </div>
             <div className="divide-y divide-brand-border">
               {items.map(item => (
-                <div key={item.id} className="grid grid-cols-12 gap-3 px-5 py-4 items-center">
-                  <div className="col-span-6 text-sm font-medium text-text-primary">{item.name}</div>
-                  <div className="col-span-2 text-center text-sm text-text-secondary">{item.qty}</div>
-                  <div className="col-span-2 text-right text-sm text-text-secondary">₹{item.price}</div>
-                  <div className="col-span-2 text-right text-sm font-semibold text-text-primary">
-                    ₹{item.price * item.qty}
+                <div key={item.id} className="grid grid-cols-12 gap-2 px-5 py-3 items-center hover:bg-brand-bg/50 transition-colors group">
+                  <div className="col-span-6">
+                    <input
+                      className="w-full text-sm font-medium text-text-primary bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary/30 rounded px-1 py-0.5"
+                      value={item.name}
+                      onChange={e => updateItem(item.id, 'name', e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 flex justify-center">
+                    <input
+                      type="number" min={1}
+                      className="w-14 text-sm text-center text-text-secondary border border-brand-border rounded px-1.5 py-0.5 focus:outline-none focus:border-primary"
+                      value={item.qty}
+                      onChange={e => updateItem(item.id, 'qty', e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 flex justify-end">
+                    <input
+                      type="number" min={0}
+                      className="w-20 text-sm text-right text-text-secondary border border-brand-border rounded px-1.5 py-0.5 focus:outline-none focus:border-primary"
+                      value={item.price}
+                      onChange={e => updateItem(item.id, 'price', e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 flex items-center justify-end gap-2">
+                    <span className="text-sm font-semibold text-text-primary">₹{item.price * item.qty}</span>
+                    <button onClick={() => removeItem(item.id)} className="opacity-0 group-hover:opacity-100 p-1 rounded text-text-muted hover:text-danger transition-all">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
             <div className="px-5 py-3 border-t border-brand-border bg-white">
-              <button className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover transition-colors">
+              <button
+                onClick={addItem}
+                className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover transition-colors"
+              >
                 <Plus className="w-4 h-4" /> Add Item
               </button>
             </div>
@@ -146,11 +195,21 @@ export default function BillingPage() {
               )}
 
               <div className="space-y-2 mt-auto pt-2">
-                <button className="w-full btn-primary py-2.5 flex items-center justify-center gap-2">
-                  <Printer className="w-4 h-4" /> Generate Bill & Print
+                <button
+                  onClick={handlePrint}
+                  className="w-full btn-primary py-2.5 flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform"
+                >
+                  <Printer className="w-4 h-4" /> Generate Bill &amp; Print
                 </button>
-                <button className="w-full py-2.5 rounded-lg border border-[#25D366] text-[#25D366] font-medium flex items-center justify-center gap-2 hover:bg-[#25D366]/5 transition-colors text-sm">
-                  <CheckCircle className="w-4 h-4" /> Send Digital Bill
+                <button
+                  onClick={handleSendDigital}
+                  className={`w-full py-2.5 rounded-lg border font-medium flex items-center justify-center gap-2 transition-all text-sm ${
+                    sent
+                      ? 'border-success bg-success-light text-success-text'
+                      : 'border-[#25D366] text-[#25D366] hover:bg-[#25D366]/5'
+                  }`}
+                >
+                  {sent ? <><CheckCircle className="w-4 h-4" /> Bill Sent! ✓</> : <><MessageSquare className="w-4 h-4" /> Send Digital Bill</>}
                 </button>
               </div>
             </div>

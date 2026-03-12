@@ -1,3 +1,6 @@
+'use client'
+import Link from 'next/link'
+import { useState } from 'react'
 import { Bell, TrendingUp, Users, CalendarClock, CheckCircle2, Clock, XCircle, AlertCircle, UserPlus, Search, CalendarX, Send } from 'lucide-react'
 
 type AppStatus = 'Completed' | 'In Consultation' | 'Waiting' | 'No-show'
@@ -20,12 +23,13 @@ const statusConfig: Record<AppStatus, { label: string; cls: string }> = {
 
 const quickActions = [
   { icon: UserPlus, label: 'Register Walk-In', href: '/reception/walk-in', color: 'bg-primary-light text-primary hover:bg-primary hover:text-white' },
-  { icon: Search, label: 'Search Patient', href: '#', color: 'bg-accent-light text-accent hover:bg-accent hover:text-white' },
-  { icon: CalendarX, label: 'Block Slot', href: '#', color: 'bg-warning-light text-warning-text hover:bg-warning hover:text-white' },
-  { icon: Send, label: 'Send Reminder', href: '#', color: 'bg-success-light text-success-text hover:bg-success hover:text-white' },
+  { icon: Search, label: 'Search Patient', href: '/reception/patients', color: 'bg-accent-light text-accent hover:bg-accent hover:text-white' },
+  { icon: CalendarX, label: 'Appointments', href: '/reception/appointments', color: 'bg-warning-light text-warning-text hover:bg-warning hover:text-white' },
+  { icon: Send, label: 'Billing', href: '/reception/billing', color: 'bg-success-light text-success-text hover:bg-success hover:text-white' },
 ]
 
 export default function ReceptionDashboard() {
+  const [reminderSent, setReminderSent] = useState(false)
   return (
     <div className="p-6">
       {/* Top bar */}
@@ -123,14 +127,14 @@ export default function ReceptionDashboard() {
             <h2 className="text-sm font-semibold text-text-primary mb-3">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-2">
               {quickActions.map(({ icon: Icon, label, href, color }) => (
-                <a
+                <Link
                   key={label}
                   href={href}
-                  className={`flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-medium transition-all duration-150 ${color}`}
+                  className={`flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-medium transition-all duration-150 hover:scale-[1.02] ${color}`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-center leading-tight">{label}</span>
-                </a>
+                </Link>
               ))}
             </div>
           </div>

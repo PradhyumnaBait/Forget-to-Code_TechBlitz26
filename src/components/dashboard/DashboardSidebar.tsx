@@ -15,14 +15,14 @@ const receptionNav = [
   { href: '/reception/walk-in', icon: UserPlus, label: 'Walk-In', exact: false },
   { href: '/reception/waitlist', icon: List, label: 'Waitlist', exact: false },
   { href: '/reception/billing', icon: Receipt, label: 'Billing', exact: false },
-  { href: '/analytics', icon: BarChart2, label: 'Analytics', exact: false },
+  { href: '/reception/analytics', icon: BarChart2, label: 'Analytics', exact: false },
 ]
 
 const doctorNav = [
   { href: '/doctor', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { href: '/doctor/patients', icon: Users, label: 'Patient Records', exact: false },
   { href: '/doctor/consultation', icon: ClipboardList, label: 'Consultation', exact: false },
-  { href: '/analytics', icon: Activity, label: 'Analytics', exact: false },
+  { href: '/doctor/analytics', icon: Activity, label: 'Analytics', exact: false },
 ]
 
 const roleUsers: Record<string, { name: string; title: string; initials: string }> = {
