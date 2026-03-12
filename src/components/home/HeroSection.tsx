@@ -101,16 +101,6 @@ export default function HeroSection() {
               ))}
             </div>
 
-            {/* Booking success mini card */}
-            <div className="card p-4 flex items-center gap-3 border-l-4 border-success shadow-md">
-              <div className="w-9 h-9 bg-success-light rounded-full flex items-center justify-center shrink-0">
-                <CheckCircle className="w-5 h-5 text-success" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-text-primary">Appointment Confirmed! 🎉</p>
-                <p className="text-xs text-text-muted">Rahul M. · 10:30 AM · March 18, 2026</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

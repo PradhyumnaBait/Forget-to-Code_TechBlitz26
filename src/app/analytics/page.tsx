@@ -1,7 +1,11 @@
 'use client'
 
-import { TrendingUp, Users, UserPlus, IndianRupee, Activity, CalendarDays, Download } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { TrendingUp, Users, UserPlus, IndianRupee, Activity, Download } from 'lucide-react'
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
+  LineChart, Line, Legend
+} from 'recharts'
 
 const revenueData = [
   { name: 'Mon', revenue: 14000 },
@@ -23,21 +27,52 @@ const patientData = [
   { name: 'Sun', online: 0, walkin: 0 },
 ]
 
+const monthlyTrend = [
+  { month: 'Sep', patients: 180, revenue: 90000 },
+  { month: 'Oct', patients: 210, revenue: 105000 },
+  { month: 'Nov', patients: 195, revenue: 97500 },
+  { month: 'Dec', patients: 160, revenue: 80000 },
+  { month: 'Jan', patients: 230, revenue: 115000 },
+  { month: 'Feb', patients: 248, revenue: 124000 },
+  { month: 'Mar', patients: 248, revenue: 113800 },
+]
+
+const visitTypeData = [
+  { name: 'General Consultation', value: 42 },
+  { name: 'Follow-up', value: 28 },
+  { name: 'Walk-in', value: 18 },
+  { name: 'Emergency', value: 12 },
+]
+
+const PIE_COLORS = ['#3B82F6', '#6366F1', '#10B981', '#F59E0B']
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-brand-border p-3 rounded-xl shadow-lg">
+      <div className="bg-white border border-brand-border p-3 rounded-xl shadow-lg min-w-[120px]">
         <p className="text-sm font-bold text-text-primary mb-2 border-b border-brand-border pb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-sm font-medium flex items-center justify-between gap-4" style={{ color: entry.color }}>
-            <span className="capitalize">{entry.name}</span>
-            <span>{entry.name === 'revenue' ? `₹${entry.value}` : entry.value}</span>
+          <p key={index} className="text-sm font-medium" style={{ color: entry.color }}>
+            {entry.name === 'revenue' ? `₹${(entry.value / 1000).toFixed(1)}k` : entry.value}
+            {' '}<span className="text-text-muted capitalize text-xs">{entry.name}</span>
           </p>
         ))}
       </div>
     )
   }
   return null
+}
+
+const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+  const RADIAN = Math.PI / 180
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+  const x = cx + radius * Math.cos(-midAngle * RADIAN)
+  const y = cy + radius * Math.sin(-midAngle * RADIAN)
+  return percent > 0.1 ? (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={700}>
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  ) : null
 }
 
 export default function AnalyticsDashboard() {
@@ -50,26 +85,26 @@ export default function AnalyticsDashboard() {
           <p className="text-sm text-text-secondary mt-0.5">Track clinic performance and patient trends.</p>
         </div>
         <div className="flex items-center gap-3">
-          <select className="input h-9 text-sm font-medium bg-white border-brand-border pr-8">
+          <select className="input h-9 text-sm font-medium bg-white border-brand-border pr-8 w-36">
             <option>Last 7 Days</option>
             <option>This Month</option>
             <option>Last Month</option>
           </select>
           <button className="flex items-center gap-2 btn-outline h-9 px-4 text-sm font-medium">
-            <Download className="w-4 h-4" /> Export Report
+            <Download className="w-4 h-4" /> Export
           </button>
         </div>
       </div>
 
-      {/* KPI Stats */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         {[
-          { label: 'Total Revenue', v: '₹1.1L', sub: '+12% vs last week', icon: IndianRupee, col: 'text-success', bg: 'bg-success-light' },
-          { label: 'Total Patients', v: '248', sub: '+5% vs last week', icon: Users, col: 'text-primary', bg: 'bg-primary-light' },
-          { label: 'Walk-ins', v: '68', sub: '-2% vs last week', icon: UserPlus, col: 'text-warning-text', bg: 'bg-warning-light' },
-          { label: 'Avg Readmission', v: '18%', sub: '+1% vs last week', icon: Activity, col: 'text-accent', bg: 'bg-accent-light' },
+          { label: 'Total Revenue', v: '₹1.1L', sub: '+12% vs last week', icon: IndianRupee, col: 'text-success', bg: 'bg-success-light', trend: '+' },
+          { label: 'Total Patients', v: '248', sub: '+5% vs last week', icon: Users, col: 'text-primary', bg: 'bg-primary-light', trend: '+' },
+          { label: 'Walk-ins', v: '68', sub: '27% of total', icon: UserPlus, col: 'text-warning-text', bg: 'bg-warning-light', trend: '~' },
+          { label: 'Avg Readmission', v: '18%', sub: 'Returning patients', icon: Activity, col: 'text-accent', bg: 'bg-accent-light', trend: '+' },
         ].map(stat => (
-          <div key={stat.label} className="card p-5">
+          <div key={stat.label} className="card p-5 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${stat.bg} ${stat.col}`}>
                 <stat.icon className="w-5 h-5" />
@@ -83,49 +118,119 @@ export default function AnalyticsDashboard() {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
+      {/* Row 1: Revenue + Patient Mix */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Revenue Area Chart */}
         <div className="card p-5">
-          <h2 className="text-base font-bold text-text-primary mb-6 flex items-center justify-between">
-            Revenue Trend
-            <span className="text-xs font-medium text-success bg-success-light px-2 py-1 rounded">Avg ₹16.2k/day</span>
-          </h2>
-          <div className="h-[280px] w-full">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-bold text-text-primary">Weekly Revenue</h2>
+            <span className="text-xs font-medium text-success bg-success-light px-2.5 py-1 rounded-full">Avg ₹16.2k/day</span>
+          </div>
+          <div className="h-[240px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+              <AreaChart data={revenueData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                  <linearGradient id="gradRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
                     <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} width={50} tickFormatter={(val) => `₹${val/1000}k`} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94A3B8' }} dy={8} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94A3B8' }} width={48} tickFormatter={v => `₹${v / 1000}k`} />
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#E2E8F0', strokeWidth: 2, strokeDasharray: '4 4' }} />
-                <Area type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                <Area type="monotone" dataKey="revenue" name="revenue" stroke="#10B981" strokeWidth={3} fill="url(#gradRevenue)" dot={{ fill: '#10B981', r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Patient Mix Chart */}
+        {/* Patient Mix Stacked Bar */}
         <div className="card p-5">
-          <h2 className="text-base font-bold text-text-primary mb-6 flex items-center justify-between">
-            Patient Acquisition Mix
-            <span className="text-xs font-medium text-primary bg-primary-light px-2 py-1 rounded">Online vs Walk-in</span>
-          </h2>
-          <div className="h-[280px] w-full">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-bold text-text-primary">Patient Acquisition</h2>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-primary inline-block" /> Online</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-accent inline-block" /> Walk-in</span>
+            </div>
+          </div>
+          <div className="h-[240px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={patientData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+              <BarChart data={patientData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} width={30} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94A3B8' }} dy={8} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94A3B8' }} width={28} />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F8FAFC' }} />
-                <Bar dataKey="online" name="Online Bookings" stackId="a" fill="#3B82F6" radius={[0, 0, 4, 4]} barSize={32} />
-                <Bar dataKey="walkin" name="Walk-ins" stackId="a" fill="#6366F1" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="online" name="online" stackId="a" fill="#3B82F6" radius={[0, 0, 4, 4]} barSize={28} />
+                <Bar dataKey="walkin" name="walkin" stackId="a" fill="#6366F1" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 2: Monthly Trend + Visit Type Pie */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Monthly Trend Line Chart */}
+        <div className="card p-5 lg:col-span-2">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-bold text-text-primary">6-Month Growth Trend</h2>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Patients</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-success inline-block" /> Revenue (₹k)</span>
+            </div>
+          </div>
+          <div className="h-[240px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={monthlyTrend} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94A3B8' }} dy={8} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94A3B8' }} width={32} />
+                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94A3B8' }} width={48} tickFormatter={v => `₹${v / 1000}k`} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#E2E8F0', strokeWidth: 2, strokeDasharray: '4 4' }} />
+                <Line yAxisId="left" type="monotone" dataKey="patients" name="patients" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, fill: '#3B82F6', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                <Line yAxisId="right" type="monotone" dataKey="revenue" name="revenue" stroke="#10B981" strokeWidth={3} dot={{ r: 4, fill: '#10B981', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Visit Type Donut */}
+        <div className="card p-5">
+          <h2 className="text-base font-bold text-text-primary mb-5">Visit Types</h2>
+          <div className="h-[180px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={visitTypeData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={45}
+                  outerRadius={80}
+                  paddingAngle={3}
+                  dataKey="value"
+                  labelLine={false}
+                  label={CustomPieLabel}
+                >
+                  {visitTypeData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number, name: string) => [`${value}%`, name]} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          {/* Legend */}
+          <div className="space-y-2 mt-3">
+            {visitTypeData.map((entry, i) => (
+              <div key={entry.name} className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs text-text-secondary">
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i] }} />
+                  {entry.name}
+                </div>
+                <span className="text-xs font-bold text-text-primary">{entry.value}%</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
