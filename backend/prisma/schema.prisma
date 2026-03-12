@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== Patients ====================
+model Patient {
+  id             String   @id @default(cuid())
+  name           String   @db.VarChar(255)
+  phone          String   @unique @db.VarChar(20)
+  email          String?  @db.VarChar(255)
+  age            Int?
+  gender         String?  @db.VarChar(20)
+  bloodGroup     String?  @db.VarChar(5)
+  medicalHistory String?  @db.Text
+  allergies      String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointments  Appointment[]
+  consultations Consultation[]
+  prescriptions Prescription[]
+
+  @@index([phone])
+  @@map("patients")
+}
+
+// ==================== Appointments ====================
+model Appointment {
+  id        String  @id @default(cuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  date      DateTime
+  timeSlot  String   @db.VarChar(10)
+  duration  Int      @default(30)
+  status    String   @default("BOOKED")
+  reason    String?  @db.Text
+  notes     String?  @db.Text
+  queuePos  Int?
+
+  consultation Consultation?
+  billing      Billing?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, timeSlot])
+  @@index([patientId])
+  @@index([date])
+  @@index([status])
+  @@map("appointments")
+}
+
+// ==================== Slots ====================
+model Slot {
+  id            String    @id @default(cuid())
+  date          DateTime
+  timeSlot      String    @db.VarChar(10)
+  status        String    @default("AVAILABLE")
+  reservedUntil DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, timeSlot])
+  @@index([date])
+  @@index([status])
+  @@map("slots")
+}
+
+// ==================== Consultations ====================
+model Consultation {
+  id            String @id @default(cuid())
+  appointmentId String @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  notes         String? @db.Text
+  diagnosis     String? @db.Text
+  advice        String? @db.Text
+  treatmentPlan String? @db.Text
+
+  prescriptions Prescription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([appointmentId])
+  @@map("consultations")
+}
+
+// ==================== Prescriptions ====================
+model Prescription {
+  id             String       @id @default(cuid())
+  consultationId String
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  medicine  String  @db.VarChar(255)
+  dose      String  @db.VarChar(100)
+  frequency String  @db.VarChar(100)
+  duration  Int
+  notes     String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([consultationId])
+  @@map("prescriptions")
+}
+
+// ==================== Billing ====================
+model Billing {
+  id            String      @id @default(cuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  consultationFee Decimal @default(0) @db.Decimal(10, 2)
+  medicineCost    Decimal @default(0) @db.Decimal(10, 2)
+  total           Decimal @db.Decimal(10, 2)
+
+  paymentStatus String    @default("PENDING")
+  paymentMethod String    @default("CASH")
+  transactionId String?   @unique
+  paidAt        DateTime?
+  receiptUrl    String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([paymentStatus])
+  @@map("billing")
+}
+
+// ==================== Notifications ====================
+model Notification {
+  id          String  @id @default(cuid())
+  patientId   String?
+  phone       String? @db.VarChar(20)
+  appointmentId String?
+
+  type      String @db.VarChar(50)
+  message   String @db.Text
+  channel   String @db.VarChar(20)
+
+  sentAt    DateTime?
+  status    String    @default("PENDING")
+  providerMessageId String? @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([status])
+  @@map("notifications")
+}
+
+// ==================== OTP ====================
+model OTP {
+  id          String   @id @default(cuid())
+  phone       String   @unique @db.VarChar(20)
+  code        String   @db.VarChar(6)
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([phone])
+  @@map("otps")
+}
+
+// ==================== Clinic Settings ====================
+model ClinicSettings {
+  id   String @id @default(cuid())
+
+  clinicName       String  @db.VarChar(255)
+  phone            String  @db.VarChar(20)
+  email            String? @db.VarChar(255)
+  address          String? @db.Text
+
+  workingHourStart String  @default("09:00")
+  workingHourEnd   String  @default("18:00")
+  slotDuration     Int     @default(30)
+  consultationFee  Decimal @default(500) @db.Decimal(10, 2)
+
+  // Working days: Mon=1 ... Sun=7
+  workingDays      String  @default("1,2,3,4,5,6")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clinic_settings")
+}
