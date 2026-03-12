@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-primary-hover transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-brand-border text-text-primary font-medium px-5 py-2.5 rounded-lg hover:bg-slate-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply border border-brand-border text-text-primary font-medium px-5 py-2.5 rounded-lg hover:bg-brand-bg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  .card {
+    @apply bg-brand-card border border-brand-border rounded-xl shadow-card;
+  }
+
+  .input {
+    @apply w-full border border-brand-border rounded-lg px-3.5 py-2.5 text-sm text-text-primary placeholder-text-muted bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-text-primary mb-1.5;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-text;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-light text-warning-text;
+  }
+
+  .badge-danger {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-danger-light text-danger-text;
+  }
+
+  .badge-info {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-light text-primary;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-brand-bg hover:text-text-primary transition-colors duration-150 cursor-pointer;
+  }
+
+  .sidebar-item-active {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-primary-light text-primary transition-colors duration-150 cursor-pointer;
+  }
+}
