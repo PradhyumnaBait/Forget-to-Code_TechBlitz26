@@ -84,10 +84,10 @@ export class BillingService {
   }
 
   async getTodayRevenue() {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    const today = new Date(todayStr + 'T00:00:00.000Z');
+    const tomorrow = new Date(todayStr + 'T00:00:00.000Z');
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 
     const bills = await prisma.billing.findMany({
       where: {

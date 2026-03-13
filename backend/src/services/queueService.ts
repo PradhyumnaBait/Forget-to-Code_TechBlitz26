@@ -14,14 +14,14 @@ export class QueueService {
     }
 
     // Count current queue position
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    const todayStart = new Date(todayStr + 'T00:00:00.000Z');
+    const todayEnd = new Date(todayStr + 'T00:00:00.000Z');
+    todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
 
     const queuePos = await prisma.appointment.count({
       where: {
-        date: { gte: today, lt: tomorrow },
+        date: { gte: todayStart, lt: todayEnd },
         status: AppointmentStatus.CHECKED_IN,
       },
     });
@@ -37,14 +37,14 @@ export class QueueService {
   }
 
   async getCurrentQueue() {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    const todayStart = new Date(todayStr + 'T00:00:00.000Z');
+    const todayEnd = new Date(todayStr + 'T00:00:00.000Z');
+    todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
 
     const queue = await prisma.appointment.findMany({
       where: {
-        date: { gte: today, lt: tomorrow },
+        date: { gte: todayStart, lt: todayEnd },
         status: {
           in: [AppointmentStatus.CHECKED_IN, AppointmentStatus.IN_CONSULTATION],
         },
@@ -72,14 +72,14 @@ export class QueueService {
 
   async startConsultation(appointmentId: string) {
     // Mark any current IN_CONSULTATION as completed first
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    const todayStart = new Date(todayStr + 'T00:00:00.000Z');
+    const todayEnd = new Date(todayStr + 'T00:00:00.000Z');
+    todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
 
     await prisma.appointment.updateMany({
       where: {
-        date: { gte: today, lt: tomorrow },
+        date: { gte: todayStart, lt: todayEnd },
         status: AppointmentStatus.IN_CONSULTATION,
       },
       data: { status: AppointmentStatus.COMPLETED },

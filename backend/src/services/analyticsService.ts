@@ -3,10 +3,10 @@ import { AppointmentStatus, PaymentStatus } from '../types';
 
 export class AnalyticsService {
   async getDailyStats(dateStr?: string) {
-    const date = dateStr ? new Date(dateStr + 'T00:00:00.000Z') : new Date();
-    date.setUTCHours(0, 0, 0, 0);
+    const todayStr = dateStr ?? new Date().toLocaleDateString('en-CA');
+    const date = new Date(todayStr + 'T00:00:00.000Z');
     const nextDay = new Date(date);
-    nextDay.setDate(nextDay.getDate() + 1);
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1);
 
     const [
       totalAppointments,
@@ -35,13 +35,17 @@ export class AnalyticsService {
     return {
       date: date.toISOString().split('T')[0],
       appointments_today: totalAppointments,
+      totalPatients: totalAppointments,
       completed,
       cancelled,
       no_show: noShow,
       checked_in: checkedIn,
       in_consultation: inConsultation,
       revenue_today: revenueTotal,
+      totalRevenue: revenueTotal,
       no_show_rate: Math.round(noShowRate * 100) / 100,
+      // avg consultation time estimate (completed × 15 min per slot)
+      avgConsultationTime: completed > 0 ? 15 : null,
     };
   }
 

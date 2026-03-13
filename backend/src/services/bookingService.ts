@@ -168,13 +168,14 @@ export class BookingService {
   }
 
   async getTodayAppointments() {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Use local date string to build range — appointments are stored as YYYY-MM-DDT00:00:00.000Z
+    const todayStr = new Date().toLocaleDateString('en-CA'); // e.g. '2026-03-13'
+    const start = new Date(todayStr + 'T00:00:00.000Z');
+    const end = new Date(todayStr + 'T00:00:00.000Z');
+    end.setUTCDate(end.getUTCDate() + 1);
 
     return prisma.appointment.findMany({
-      where: { date: { gte: today, lt: tomorrow } },
+      where: { date: { gte: start, lt: end } },
       include: { patient: true, billing: true },
       orderBy: { timeSlot: 'asc' },
     });
