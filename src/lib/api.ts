@@ -82,6 +82,18 @@ export const bookingApi = {
       body: JSON.stringify(payload),
     }),
 
+  walkIn: (payload: {
+    patientName: string;
+    patientPhone: string;
+    date: string;
+    timeSlot: string;
+    reason?: string;
+  }) =>
+    request<{ success: boolean; data: Record<string, unknown> }>('/bookings/create', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
   cancelAppointment: (id: string) =>
     request<{ success: boolean }>(`/bookings/cancel/${id}`, { method: 'POST' }),
 

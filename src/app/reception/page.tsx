@@ -54,6 +54,12 @@ export default function ReceptionDashboard() {
 
   useEffect(() => { load() }, [load])
 
+  // Auto-refresh every 30s so new appointments appear without manual reload
+  useEffect(() => {
+    const interval = setInterval(load, 30_000)
+    return () => clearInterval(interval)
+  }, [load])
+
   const totalToday = appointments.length
   const queueSize = queueData?.totalInQueue ?? 0
   const consultingPatient = queueData?.current?.patient?.name ?? 'None'

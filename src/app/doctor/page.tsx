@@ -44,6 +44,12 @@ export default function DoctorDashboard() {
 
   useEffect(() => { load() }, [load])
 
+  // Auto-refresh every 30s so new appointments from the Appointments Interface appear automatically
+  useEffect(() => {
+    const interval = setInterval(load, 30_000)
+    return () => clearInterval(interval)
+  }, [load])
+
   const current = appointments.find(a => a.status === 'IN_CONSULTATION')
   const nextUp = appointments.find(a => a.status === 'CHECKED_IN')
   const completed = appointments.filter(a => a.status === 'COMPLETED').length
