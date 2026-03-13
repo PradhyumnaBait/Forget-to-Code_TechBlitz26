@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calendar, Clock, User, IndianRupee, ArrowRight, ArrowLeft, Stethoscope, Hash, Info, AlertCircle, Loader2 } from 'lucide-react'
+import { Calendar, Clock, User, IndianRupee, ArrowRight, ArrowLeft, Stethoscope, Info, AlertCircle, Loader2 } from 'lucide-react'
 import StepProgressBar from '@/components/booking/StepProgressBar'
 import Link from 'next/link'
-import { bookingApi, analyticsApi } from '@/lib/api'
+import { bookingApi } from '@/lib/api'
+import { useAuth } from '@/lib/authContext'
 
 function to12h(t: string): string {
   if (!t) return t
@@ -18,34 +19,39 @@ function to12h(t: string): string {
 
 export default function ConfirmPage() {
   const router = useRouter()
+  const { patient: authPatient } = useAuth()
   const [payMode, setPayMode] = useState<'upi' | 'clinic'>('clinic')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [consultationFee, setConsultationFee] = useState(500)
+  const [consultationFee] = useState(500)
 
-  // Read sessionStorage
-  const patientRaw = typeof window !== 'undefined' ? sessionStorage.getItem('md_patient') : null
-  const patient = patientRaw ? JSON.parse(patientRaw) : null
-  const dateStr: string = typeof window !== 'undefined' ? sessionStorage.getItem('md_date') ?? '' : ''
-  const slotStr: string = typeof window !== 'undefined' ? sessionStorage.getItem('md_slot') ?? '' : ''
+  // sessionStorage data — read in useEffect (client-only)
+  const [dateStr, setDateStr] = useState('')
+  const [slotStr, setSlotStr] = useState('')
+  const [patient, setPatient] = useState<any>(null)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const d = sessionStorage.getItem('md_date') ?? ''
+    const s = sessionStorage.getItem('md_slot') ?? ''
+    const p = sessionStorage.getItem('md_patient')
+    if (!d || !s) {
+      router.replace('/book/select-date')
+      return
+    }
+    setDateStr(d)
+    setSlotStr(s)
+    if (p) setPatient(JSON.parse(p))
+    setReady(true)
+  }, [router])
 
   const displayDate = dateStr ? new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   }) : '—'
 
-  // Get settings to show actual fee
-  useEffect(() => {
-    analyticsApi.today().then((res: any) => {
-      if (res?.data?.settings?.consultationFee) {
-        setConsultationFee(Number(res.data.settings.consultationFee))
-      }
-    }).catch(() => {})
-  }, [])
-
-  if (!dateStr || !slotStr) {
-    router.replace('/book/select-date')
-    return null
-  }
+  // Determine patient name — prefer auth context (from JWT), fall back to stored patient details
+  const patientName = authPatient?.name ?? patient?.name ?? '—'
+  const patientPhone = authPatient?.phone ?? patient?.phone ?? ''
 
   const handleConfirm = async () => {
     setLoading(true)
@@ -56,11 +62,24 @@ export default function ConfirmPage() {
         timeSlot: slotStr,
         symptoms: patient?.symptoms,
         paymentMethod: payMode === 'upi' ? 'UPI' : 'AT_CLINIC',
-      })
+        // Include patient fields as fallback if no JWT
+        patientName,
+        patientPhone,
+      } as any)
       if (res.success && res.data) {
-        // Store appointment id for success page
-        sessionStorage.setItem('md_appointment', JSON.stringify(res.data))
+        // Store full appointment object for success page (includes date, timeSlot, patient)
+        const apt: any = {
+          ...res.data,
+          // Ensure date/slot stored even if backend omits them
+          _date: dateStr,
+          _slot: slotStr,
+        }
+        sessionStorage.setItem('md_appointment', JSON.stringify(apt))
+        // Keep md_date/md_slot for the success page to also read as fallback
+        // (they'll be cleaned up there)
         router.push('/book/success')
+      } else {
+        setError((res as any).message ?? 'Booking failed. Please try again.')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Booking failed. Please try again.')
@@ -69,9 +88,17 @@ export default function ConfirmPage() {
     }
   }
 
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center py-20 text-text-muted gap-2">
+        <Loader2 className="w-5 h-5 animate-spin" /> Loading…
+      </div>
+    )
+  }
+
   const rows = [
     { icon: Stethoscope, label: 'Doctor', value: 'Dr. Ananya Sharma' },
-    { icon: User, label: 'Patient', value: patient?.name ?? '—' },
+    { icon: User, label: 'Patient', value: patientName },
     { icon: Calendar, label: 'Date', value: displayDate },
     { icon: Clock, label: 'Time', value: to12h(slotStr) },
     { icon: IndianRupee, label: 'Consultation Fee', value: `₹${consultationFee}` },

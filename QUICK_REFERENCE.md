@@ -6,6 +6,8 @@
 - **Health Check:** http://localhost:3001/health
 
 ## 👤 Test Login Credentials
+
+### Patient Login (OTP-Based)
 **Phone:** `+919999999999` (Demo Patient)  
 **OTP:** Check backend console after clicking "Send OTP"
 
@@ -13,6 +15,16 @@ Example console output:
 ```
 📱 [DEV MODE] OTP for +919999999999: 123456
 ```
+
+### Doctor Login
+**URL:** http://localhost:3000/login/doctor  
+**Email:** `doctor@meddesk.in`  
+**Password:** `MedDesk@2026`
+
+### Receptionist Login
+**URL:** http://localhost:3000/login/reception  
+**Email:** `reception@meddesk.in`  
+**Password:** `MedDesk@2026`
 
 ## ✅ What's Working
 

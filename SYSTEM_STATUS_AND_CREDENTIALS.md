@@ -120,11 +120,12 @@ All messages are logged to backend console instead of being sent.
 
 ## 🔐 Authentication & Login
 
-### System Type: OTP-Based (Passwordless)
+### System Type: Dual Authentication
 
-**NO traditional username/password!**
+**1. Patient Login: OTP-Based (Passwordless)**
+**2. Staff Login: Email/Password (Doctor & Receptionist)**
 
-### How to Login
+### Patient Login (OTP-Based)
 
 **Step 1:** Go to http://localhost:3000
 
@@ -144,13 +145,53 @@ All messages are logged to backend console instead of being sent.
 
 **Step 6:** You're logged in! Token valid for 7 days
 
-### Pre-existing Test Account
+### Doctor Login
+
+**URL:** http://localhost:3000/login/doctor
+
+**Credentials:**
+- **Email:** `doctor@meddesk.in`
+- **Password:** `MedDesk@2026`
+
+**Access:** Doctor Dashboard with:
+- Patient consultations
+- Prescription management
+- Patient history
+- Analytics
+
+### Receptionist Login
+
+**URL:** http://localhost:3000/login/reception
+
+**Credentials:**
+- **Email:** `reception@meddesk.in`
+- **Password:** `MedDesk@2026`
+
+**Access:** Reception Dashboard with:
+- Appointment management
+- Walk-in registration
+- Queue/waitlist management
+- Billing
+- Patient records
+- Analytics
+
+### Pre-existing Test Accounts
 
 **Demo Patient:**
 - Phone: `+919999999999`
 - Name: Demo Patient
 - Age: 30
 - Gender: Male
+
+**Doctor Account:**
+- Email: `doctor@meddesk.in`
+- Password: `MedDesk@2026`
+- Role: Doctor
+
+**Receptionist Account:**
+- Email: `reception@meddesk.in`
+- Password: `MedDesk@2026`
+- Role: Receptionist
 
 **Any New Phone Number:**
 - System auto-creates new patient account

@@ -39,11 +39,13 @@ export const getAvailableSlots = async (
     }
 
     const slots = await slotService.getAvailableSlots(date);
-    res.json(successResponse('Available slots', { date, slots }));
+    // Return both field names for frontend compatibility
+    res.json(successResponse('Available slots', { date, slots, availableSlots: slots }));
   } catch (err) {
     next(err);
   }
 };
+
 
 export const reserveSlot = async (
   req: AuthRequest,
@@ -82,20 +84,48 @@ export const createAppointment = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = createAppointmentSchema.parse(req.body);
-    const appointment = await bookingService.createAppointment(data);
+    const { date, timeSlot, symptoms, paymentMethod, reason,
+            patientName, patientPhone, patientEmail } = req.body as Record<string, string>;
+
+    if (!date || !timeSlot) {
+      res.status(400).json(errorResponse('date and timeSlot are required'));
+      return;
+    }
+
+    // Prefer JWT patient, fall back to body fields
+    let finalPatientName  = patientName  ?? '';
+    let finalPatientPhone = patientPhone ?? '';
+    let finalPatientEmail = patientEmail;
+
+    if (req.patient) {
+      finalPatientName  = req.patient.name  ?? finalPatientName;
+      finalPatientPhone = req.patient.phone ?? finalPatientPhone;
+    }
+
+    if (!finalPatientName || !finalPatientPhone) {
+      res.status(400).json(errorResponse('Patient name and phone are required'));
+      return;
+    }
+
+    const appointment = await bookingService.createAppointment({
+      patientName:  finalPatientName,
+      patientPhone: finalPatientPhone,
+      patientEmail: finalPatientEmail,
+      date,
+      timeSlot,
+      reason: symptoms ?? reason,
+    });
+
     res.status(201).json(successResponse('Appointment booked successfully', appointment));
   } catch (err: unknown) {
-    if (
-      err instanceof Error &&
-      err.message?.includes('Unique constraint')
-    ) {
+    if (err instanceof Error && err.message?.includes('Unique constraint')) {
       res.status(409).json(errorResponse('This time slot is already booked'));
       return;
     }
     next(err);
   }
 };
+
 
 export const cancelAppointment = async (
   req: AuthRequest,
