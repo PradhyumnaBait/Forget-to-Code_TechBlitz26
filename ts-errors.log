@@ -1,0 +1,91 @@
+backend/prisma/seed.ts(1,30): error TS2307: Cannot find module '@prisma/client' or its corresponding type declarations.
+backend/src/config/database.ts(1,30): error TS2307: Cannot find module '@prisma/client' or its corresponding type declarations.
+backend/src/config/environment.ts(1,20): error TS2307: Cannot find module 'dotenv' or its corresponding type declarations.
+backend/src/config/openai.ts(1,20): error TS2307: Cannot find module 'openai' or its corresponding type declarations.
+backend/src/config/twilio.ts(1,20): error TS2307: Cannot find module 'twilio' or its corresponding type declarations.
+backend/src/controllers/aiController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/aiController.ts(24,18): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/aiController.ts(39,76): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/analyticsController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/analyticsController.ts(11,60): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+backend/src/controllers/analyticsController.ts(24,33): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+backend/src/controllers/analyticsController.ts(54,22): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+backend/src/controllers/analyticsController.ts(54,49): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+backend/src/controllers/appointmentController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/appointmentController.ts(11,58): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+backend/src/controllers/appointmentController.ts(44,69): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/authController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/authController.ts(22,47): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/authController.ts(42,54): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/authController.ts(99,35): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/authController.ts(122,18): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/authController.ts(143,30): error TS2307: Cannot find module 'jsonwebtoken' or its corresponding type declarations.
+backend/src/controllers/billingController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/billingController.ts(5,25): error TS2307: Cannot find module 'pdfkit' or its corresponding type declarations.
+backend/src/controllers/billingController.ts(20,45): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/billingController.ts(34,64): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/billingController.ts(56,18): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/billingController.ts(59,11): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/billingController.ts(75,55): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/bookingController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/bookingController.ts(35,22): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+backend/src/controllers/bookingController.ts(61,18): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/bookingController.ts(88,61): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/bookingController.ts(136,24): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/bookingController.ts(137,28): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/bookingController.ts(151,24): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/bookingController.ts(157,18): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/consultationController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/consultationController.ts(21,35): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/consultationController.ts(35,40): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/consultationController.ts(49,76): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/consultationController.ts(66,69): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/patientController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/patientController.ts(12,54): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+backend/src/controllers/patientController.ts(47,24): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/patientController.ts(85,35): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/patientController.ts(114,35): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/patientController.ts(116,24): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/patientController.ts(131,33): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+backend/src/controllers/patientController.ts(157,24): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/prescriptionController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/prescriptionController.ts(5,25): error TS2307: Cannot find module 'pdfkit' or its corresponding type declarations.
+backend/src/controllers/prescriptionController.ts(37,47): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/prescriptionController.ts(51,75): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/controllers/prescriptionController.ts(65,76): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/prescriptionController.ts(82,76): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/prescriptionController.ts(137,54): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/queueController.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/queueController.ts(11,56): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/queueController.ts(41,57): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/queueController.ts(76,69): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/queueController.ts(89,59): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+backend/src/controllers/whatsappController.ts(1,49): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/controllers/whatsappController.ts(50,18): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+backend/src/middlewares/authMiddleware.ts(1,40): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/middlewares/authMiddleware.ts(2,17): error TS2307: Cannot find module 'jsonwebtoken' or its corresponding type declarations.
+backend/src/middlewares/authMiddleware.ts(13,28): error TS2339: Property 'headers' does not exist on type 'AuthRequest'.
+backend/src/middlewares/authMiddleware.ts(80,23): error TS2339: Property 'headers' does not exist on type 'AuthRequest'.
+backend/src/middlewares/errorMiddleware.ts(1,49): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/middlewares/rateLimiter.ts(1,23): error TS2307: Cannot find module 'express-rate-limit' or its corresponding type declarations.
+backend/src/routes/aiRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/analyticsRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/appointmentRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/authRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/billingRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/bookingRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/consultationRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/index.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/patientRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/prescriptionRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/queueRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/whatsappRoutes.ts(1,24): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/routes/whatsappRoutes.ts(4,21): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/scheduler/reminderCron.ts(1,18): error TS2307: Cannot find module 'node-cron' or its corresponding type declarations.
+backend/src/server.ts(1,21): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+backend/src/server.ts(2,18): error TS2307: Cannot find module 'cors' or its corresponding type declarations.
+backend/src/server.ts(3,20): error TS2307: Cannot find module 'helmet' or its corresponding type declarations.
+backend/src/services/otpService.ts(4,17): error TS2307: Cannot find module 'jsonwebtoken' or its corresponding type declarations.
+backend/src/types/index.ts(1,25): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+src/lib/authContext.tsx(73,19): error TS2352: Conversion of type 'Record<string, unknown>' to type 'Patient' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'Record<string, unknown>' is missing the following properties from type 'Patient': id, name, phone

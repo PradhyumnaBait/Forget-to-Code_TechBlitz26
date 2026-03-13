@@ -21,7 +21,7 @@ module.exports = {
         brand: {
           bg: '#F8FAFC',
           card: '#FFFFFF',
-          border: '#E2E8F0',
+          border: '#C0C5CC',
         },
         text: {
           primary: '#0F172A',
@@ -48,9 +48,10 @@ module.exports = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        card: '0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px -1px rgba(0,0,0,0.07)',
-        md: '0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.07)',
-        lg: '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07)',
+        card: '0 1px 4px 0 rgba(0,0,0,0.12), 0 1px 3px -1px rgba(0,0,0,0.10)',
+        sm:   '0 2px 6px 0 rgba(0,0,0,0.10), 0 1px 3px -1px rgba(0,0,0,0.08)',
+        md:   '0 5px 10px -1px rgba(0,0,0,0.12), 0 3px 6px -2px rgba(0,0,0,0.08)',
+        lg:   '0 12px 20px -3px rgba(0,0,0,0.12), 0 5px 8px -4px rgba(0,0,0,0.08)',
       },
       borderRadius: {
         xl: '0.875rem',

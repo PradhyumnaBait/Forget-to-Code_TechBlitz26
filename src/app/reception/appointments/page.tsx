@@ -69,7 +69,7 @@ export default function AppointmentsPage() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setStatusFilter('All')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${statusFilter === 'All' ? 'bg-primary text-white border-primary' : 'bg-white border-brand-border text-text-secondary hover:bg-brand-bg'}`}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all duration-150 ${statusFilter === 'All' ? 'bg-primary text-white border-primary' : 'bg-white border-brand-border text-text-secondary hover:bg-brand-bg'}`}
           >
             All ({appointments.length})
           </button>
@@ -77,7 +77,7 @@ export default function AppointmentsPage() {
             <button
               key={f}
               onClick={() => setStatusFilter(statusFilter === f ? 'All' : f)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${statusFilter === f ? 'bg-primary text-white border-primary' : 'bg-white border-brand-border text-text-secondary hover:bg-brand-bg'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all duration-150 ${statusFilter === f ? 'bg-primary text-white border-primary' : 'bg-white border-brand-border text-text-secondary hover:bg-brand-bg'}`}
             >
               {f}
             </button>
@@ -105,7 +105,7 @@ export default function AppointmentsPage() {
             </thead>
             <tbody className="divide-y divide-brand-border">
               {filtered.map(a => (
-                <tr key={a.id} className="hover:bg-brand-bg/50 transition-colors">
+                <tr key={a.id} className="hover:bg-gray-50 transition-all duration-150">
                   <td className="px-5 py-3.5 text-xs font-mono text-text-muted">{a.id}</td>
                   <td className="px-5 py-3.5">
                     <span className="text-sm font-semibold text-text-primary">{a.name}</span>

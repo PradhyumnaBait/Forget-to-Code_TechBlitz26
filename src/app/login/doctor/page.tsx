@@ -55,22 +55,22 @@ export default function DoctorLoginPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-brand-bg flex items-center justify-center px-4 py-12">
+    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-md mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg ring-4 ring-blue-100 mb-4">
             <Stethoscope className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-extrabold text-text-primary">Doctor Login</h1>
+          <h1 className="text-2xl font-extrabold text-text-primary tracking-tight">Doctor Login</h1>
           <p className="text-sm text-text-secondary mt-1">Sign in to access your dashboard</p>
         </div>
 
-        <div className="card p-6 shadow-md">
-          <div className="bg-primary-light border border-primary/20 rounded-xl px-4 py-3 mb-5 text-xs text-primary font-medium">
+        <div className="card p-8 shadow-xl border-gray-200">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-6 text-xs text-blue-700 font-medium">
             🔑 Use your clinic credentials to sign in
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="label">Email Address</label>
               <div className="relative">
@@ -96,14 +96,14 @@ export default function DoctorLoginPage() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                 />
-                <button type="button" onClick={() => setShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
+                <button type="button" onClick={() => setShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-sm text-danger">
+              <div className="flex items-center gap-2 text-sm text-danger bg-danger/5 border border-danger/20 rounded-xl px-3 py-2.5">
                 <AlertCircle className="w-4 h-4 shrink-0" /> {error}
               </div>
             )}
@@ -111,7 +111,7 @@ export default function DoctorLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 btn-primary py-3 mt-2"
+              className="w-full flex items-center justify-center gap-2 btn-primary py-3 mt-1"
             >
               {loading ? (
                 <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Signing in…</>

@@ -96,7 +96,7 @@ export default function WalkInPage() {
                 <button
                   type="button"
                   onClick={() => setPriority('normal')}
-                  className={`flex-1 py-2.5 px-4 rounded-xl border flex items-center justify-center gap-2 text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-xl border flex items-center justify-center gap-2 text-sm font-medium transition-all duration-150 hover:scale-[1.02] ${
                     priority === 'normal'
                       ? 'border-primary bg-primary-light text-primary'
                       : 'border-brand-border text-text-secondary hover:border-text-muted'
@@ -107,7 +107,7 @@ export default function WalkInPage() {
                 <button
                   type="button"
                   onClick={() => setPriority('urgent')}
-                  className={`flex-1 py-2.5 px-4 rounded-xl border flex items-center justify-center gap-2 text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-xl border flex items-center justify-center gap-2 text-sm font-medium transition-all duration-150 hover:scale-[1.02] ${
                     priority === 'urgent'
                       ? 'border-danger bg-danger-light text-danger-text'
                       : 'border-brand-border text-text-secondary hover:border-danger/40'
@@ -145,8 +145,8 @@ export default function WalkInPage() {
               {slots.map(({ time, status }) => (
                 <div
                   key={time}
-                  className={`text-center py-2 px-1 rounded-lg border text-sm font-medium ${
-                    status === 'available' ? 'border-primary/30 bg-primary-light text-primary' :
+                  className={`text-center py-2 px-1 rounded-xl border text-sm font-medium transition-all duration-150 ${
+                    status === 'available' ? 'border-primary/30 bg-primary-light text-primary hover:scale-[1.02]' :
                     status === 'reserved' ? 'border-warning/30 bg-warning-light text-warning-text' :
                     'border-brand-border bg-brand-bg text-text-muted opacity-60'
                   }`}
@@ -183,7 +183,7 @@ export default function WalkInPage() {
               </div>
             </div>
             
-            <button className="w-full mt-5 py-2 text-sm font-medium text-text-secondary border border-brand-border rounded-lg hover:bg-white hover:border-text-muted transition-colors">
+            <button className="w-full mt-5 py-2 text-sm font-medium text-text-secondary border border-brand-border rounded-xl hover:bg-white hover:border-text-muted hover:scale-[1.01] transition-all duration-150">
               Add to Waitlist Instead
             </button>
           </div>

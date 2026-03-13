@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await authApi.getProfile()
       if (res.success && res.data) {
-        const p = res.data as Patient
+        const p = res.data as unknown as Patient
         setPatient(p)
         localStorage.setItem('md_patient_data', JSON.stringify(p))
       }

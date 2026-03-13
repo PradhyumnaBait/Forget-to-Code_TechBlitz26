@@ -100,11 +100,10 @@ export default function ReceptionDashboard() {
         </div>
       </div>
 
-      {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {kpis.map(({ label, value, sub, subCls, icon: Icon, iconCls }) => (
-          <div key={label} className="card p-4 flex items-start gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconCls}`}>
+          <div key={label} className="card-hover p-4 flex items-start gap-3">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconCls}`}>
               <Icon className="w-5 h-5" />
             </div>
             <div>
@@ -135,7 +134,7 @@ export default function ReceptionDashboard() {
               {appointments.slice(0, 10).map((apt: any) => {
                 const cfg = statusConfig[apt.status] ?? { label: apt.status, cls: 'badge-warning' }
                 return (
-                  <div key={apt.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-brand-bg/60 transition-colors">
+                  <div key={apt.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-all duration-150">
                     <div className="w-16 shrink-0">
                       <span className="text-sm font-medium text-text-secondary">{apt.timeSlot}</span>
                     </div>
@@ -158,7 +157,7 @@ export default function ReceptionDashboard() {
             <div className="grid grid-cols-2 gap-2">
               {quickActions.map(({ icon: Icon, label, href, color }) => (
                 <Link key={label} href={href}
-                  className={`flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-medium transition-all duration-150 hover:scale-[1.02] ${color}`}>
+                  className={`flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.03] hover:-translate-y-[1px] ${color}`}>
                   <Icon className="w-5 h-5" />
                   <span className="text-center leading-tight">{label}</span>
                 </Link>

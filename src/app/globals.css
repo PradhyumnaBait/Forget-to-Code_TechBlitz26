@@ -42,41 +42,41 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-primary text-white font-semibold px-5 py-2.5 rounded-lg
-    hover:bg-primary-hover active:scale-[0.98]
-    transition-all duration-200 ease-in-out
-    focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-5 py-2.5 rounded-xl
+    hover:from-blue-600 hover:to-blue-700 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]
+    transition-all duration-200 ease-out
+    focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2
     disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100;
   }
 
   .btn-secondary {
-    @apply bg-brand-border text-text-primary font-medium px-5 py-2.5 rounded-lg
-    hover:bg-slate-200 active:scale-[0.98]
-    transition-all duration-200 ease-in-out
+    @apply bg-brand-border text-text-primary font-medium px-5 py-2.5 rounded-xl
+    hover:bg-slate-200 hover:scale-[1.01] active:scale-[0.98]
+    transition-all duration-200 ease-out
     focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2;
   }
 
   .btn-outline {
-    @apply border border-brand-border text-text-primary font-medium px-5 py-2.5 rounded-lg
-    hover:bg-brand-bg hover:border-text-muted active:scale-[0.98]
-    transition-all duration-200 ease-in-out
+    @apply border border-brand-border text-text-primary font-medium px-5 py-2.5 rounded-xl
+    hover:bg-brand-bg hover:border-text-muted hover:scale-[1.01] active:scale-[0.98]
+    transition-all duration-200 ease-out
     focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
 
   .card {
-    @apply bg-brand-card border border-brand-border rounded-xl shadow-card
-    transition-shadow duration-200 ease-in-out;
+    @apply bg-brand-card border border-brand-border rounded-2xl shadow-card
+    transition-all duration-200 ease-in-out;
   }
 
   .card-hover {
-    @apply card hover:shadow-md hover:-translate-y-0.5 transition-all duration-200;
+    @apply card hover:shadow-lg hover:-translate-y-[1px] transition-all duration-200;
   }
 
   .input {
-    @apply w-full border border-brand-border rounded-lg px-3.5 py-2.5 text-sm text-text-primary
+    @apply w-full border border-brand-border rounded-xl px-3.5 py-2.5 text-sm text-text-primary
     placeholder-text-muted bg-white
-    focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-    transition-all duration-200 ease-in-out;
+    focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400
+    transition-all duration-150 ease-out;
   }
 
   .label {
@@ -104,29 +104,39 @@
   }
 
   .sidebar-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-    text-text-secondary hover:bg-brand-bg hover:text-text-primary
-    transition-all duration-150 ease-in-out cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+    text-text-secondary hover:bg-gray-100 hover:text-text-primary
+    transition-all duration-200 ease-out cursor-pointer;
   }
 
   .sidebar-item-active {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-    bg-primary-light text-primary
-    transition-all duration-150 ease-in-out cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+    bg-blue-50 text-blue-600
+    transition-all duration-200 ease-out cursor-pointer;
   }
 
   /* Skeleton loader */
   .skeleton {
-    @apply animate-pulse bg-slate-200 rounded-lg;
+    @apply animate-pulse bg-slate-200 rounded-xl;
   }
 
   /* Fade in animation */
   .fade-in {
-    animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  /* Premium slide-up entry */
+  .fade-up {
+    animation: fadeUp 0.4s ease-out both;
   }
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 

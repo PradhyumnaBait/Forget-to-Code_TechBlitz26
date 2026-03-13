@@ -55,22 +55,22 @@ export default function ReceptionLoginPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-brand-bg flex items-center justify-center px-4 py-12">
+    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center shadow-md mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg ring-4 ring-indigo-100 mb-4">
             <UserCog className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-extrabold text-text-primary">Receptionist Login</h1>
+          <h1 className="text-2xl font-extrabold text-text-primary tracking-tight">Receptionist Login</h1>
           <p className="text-sm text-text-secondary mt-1">Sign in to manage the clinic desk</p>
         </div>
 
-        <div className="card p-6 shadow-md">
-          <div className="bg-accent-light border border-accent/20 rounded-xl px-4 py-3 mb-5 text-xs text-accent font-medium">
+        <div className="card p-8 shadow-xl border-gray-200">
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 mb-6 text-xs text-indigo-700 font-medium">
             🔑 Use your clinic credentials to sign in
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="label">Email Address</label>
               <div className="relative">
@@ -86,20 +86,20 @@ export default function ReceptionLoginPage() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input type={showPw ? 'text' : 'password'} className="input pl-9 pr-10" placeholder="••••••••"
                   value={password} onChange={e => setPassword(e.target.value)} />
-                <button type="button" onClick={() => setShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
+                <button type="button" onClick={() => setShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-sm text-danger">
+              <div className="flex items-center gap-2 text-sm text-danger bg-danger/5 border border-danger/20 rounded-xl px-3 py-2.5">
                 <AlertCircle className="w-4 h-4 shrink-0" /> {error}
               </div>
             )}
 
             <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 mt-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50">
+              className="w-full flex items-center justify-center gap-2 py-3 mt-1 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-indigo-700 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] transition-all duration-200 ease-out disabled:opacity-50 disabled:scale-100">
               {loading ? (
                 <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Signing in…</>
               ) : (

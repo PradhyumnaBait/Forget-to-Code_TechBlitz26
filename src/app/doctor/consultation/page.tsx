@@ -17,7 +17,7 @@ export default function ConsultationPanel() {
   return (
     <div className="p-6">
       {/* Patient Banner */}
-      <div className="bg-white border text-sm font-medium border-brand-border rounded-xl px-5 py-4 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+      <div className="bg-white border text-sm font-medium border-gray-200 rounded-2xl px-5 py-4 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-md">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-accent-light rounded-full flex items-center justify-center text-accent font-bold">PS</div>
           <div>
@@ -80,7 +80,7 @@ export default function ConsultationPanel() {
               <textarea 
                 value={val}
                 onChange={e => set(e.target.value)}
-                className="w-full text-sm text-text-secondary placeholder-text-muted bg-brand-bg rounded-lg border-0 resize-none p-3 focus:ring-2 focus:ring-primary focus:bg-white transition-colors"
+                className="w-full text-sm text-text-secondary placeholder-text-muted bg-brand-bg rounded-xl border-0 resize-none p-3 focus:ring-2 focus:ring-blue-200 focus:bg-white transition-all duration-200"
                 rows={3}
               />
             </div>
@@ -90,7 +90,7 @@ export default function ConsultationPanel() {
             <label className="text-sm font-semibold text-text-primary block mb-2">Follow-up</label>
             <div className="flex gap-2">
               {['No follow-up', '3 Days', '5 Days', '1 Week', 'Custom'].map(t => (
-                <button key={t} className={`flex-1 py-2 text-xs font-medium rounded-lg border ${t === '5 Days' ? 'border-primary bg-primary-light text-primary' : 'border-brand-border text-text-secondary bg-white hover:bg-brand-bg'}`}>
+                <button key={t} className={`flex-1 py-2 text-xs font-medium rounded-xl border transition-all duration-150 hover:scale-[1.02] ${t === '5 Days' ? 'border-primary bg-primary-light text-primary' : 'border-brand-border text-text-secondary bg-white hover:bg-brand-bg'}`}>
                   {t}
                 </button>
               ))}
@@ -115,7 +115,7 @@ export default function ConsultationPanel() {
                 { name: 'Cetirizine 10mg', dose: '0-0-1', dur: '3 days', note: 'Before meals at night' },
                 { name: 'Vitamin D3 60k', dose: 'Weekly', dur: '4 weeks', note: 'With milk' }
               ].map((m, i) => (
-                <div key={i} className="group flex items-start justify-between p-3 rounded-xl border border-brand-border bg-white hover:border-primary/40 transition-colors">
+                <div key={i} className="group flex items-start justify-between p-3 rounded-xl border border-brand-border bg-white hover:border-primary/40 hover:bg-gray-50 hover:shadow-sm transition-all duration-150">
                   <div>
                     <p className="text-sm font-bold text-text-primary">{m.name}</p>
                     <div className="flex gap-3 text-xs text-text-secondary mt-1 font-medium">

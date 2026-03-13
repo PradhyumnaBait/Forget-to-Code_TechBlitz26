@@ -56,9 +56,9 @@ export default function FloatingAI() {
     <>
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-24 right-5 w-[360px] bg-white rounded-2xl shadow-xl border border-brand-border z-50 flex flex-col overflow-hidden" style={{ maxHeight: '520px' }}>
+        <div className="fixed bottom-24 right-5 w-[360px] bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 flex flex-col overflow-hidden" style={{ maxHeight: '520px' }}>
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-primary to-accent">
+          <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-indigo-500 to-blue-500">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
                 <Bot className="w-5 h-5 text-white" />
@@ -85,9 +85,9 @@ export default function FloatingAI() {
                     <Bot className="w-3.5 h-3.5 text-primary" />
                   </div>
                 )}
-                <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${
                   msg.from === 'user'
-                    ? 'bg-primary text-white rounded-br-sm'
+                    ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-sm'
                     : 'bg-white border border-brand-border text-text-primary rounded-bl-sm shadow-card'
                 }`}>
                   {msg.text}
@@ -134,12 +134,12 @@ export default function FloatingAI() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage(input)}
               placeholder="Type a message…"
-              className="flex-1 text-sm text-text-primary placeholder-text-muted bg-brand-bg rounded-lg px-3 py-2 border border-brand-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              className="flex-1 text-sm text-text-primary placeholder-text-muted bg-brand-bg rounded-xl px-3 py-2 border border-brand-border focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-primary transition-all duration-200"
             />
             <button
               onClick={() => sendMessage(input)}
               disabled={!input.trim() || typing}
-              className="p-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-2 bg-primary text-white rounded-xl hover:bg-primary-hover hover:scale-[1.05] active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
             >
               <Send className="w-4 h-4" />
             </button>
@@ -150,7 +150,7 @@ export default function FloatingAI() {
       {/* FAB Toggle Button */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="fixed bottom-5 right-5 flex items-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 z-50"
+        className="fixed bottom-5 right-5 flex items-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-4 py-3 rounded-full shadow-lg hover:shadow-2xl hover:scale-[1.07] active:scale-95 transition-all duration-200 ease-in-out z-50"
       >
         {open ? <X className="w-5 h-5" /> : <><Sparkles className="w-4 h-4" /><span className="text-sm font-semibold">Ask AI</span></>}
       </button>

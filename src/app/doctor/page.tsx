@@ -100,24 +100,24 @@ export default function DoctorDashboard() {
 
       {/* Metric Cards */}
       <div className="grid grid-cols-3 gap-5 mb-6">
-        <div className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
-          <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center shrink-0"><UserPlus className="w-5 h-5 text-primary" /></div>
+        <div className="card-hover p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-primary-light flex items-center justify-center shrink-0"><UserPlus className="w-5 h-5 text-primary" /></div>
           <div className="flex-1 min-w-0">
             <p className="text-2xl font-bold text-text-primary">{loading ? '…' : appointments.length}</p>
             <p className="text-xs text-text-secondary">Today's Patients</p>
             {stats?.avgConsultationTime && <p className="text-xs font-medium text-success flex items-center gap-0.5 mt-0.5"><TrendingUp className="w-3 h-3" /> ~{stats.avgConsultationTime}m avg</p>}
           </div>
         </div>
-        <div className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
-          <div className="w-10 h-10 rounded-xl bg-success-light flex items-center justify-center shrink-0"><CheckCircle2 className="w-5 h-5 text-success" /></div>
+        <div className="card-hover p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-success-light flex items-center justify-center shrink-0"><CheckCircle2 className="w-5 h-5 text-success" /></div>
           <div className="flex-1 min-w-0">
             <p className="text-2xl font-bold text-success-text">{loading ? '…' : completed}</p>
             <p className="text-xs text-text-secondary">Completed</p>
             {appointments.length > 0 && <p className="text-xs text-success font-medium mt-0.5">{Math.round(completed / appointments.length * 100)}% completion</p>}
           </div>
         </div>
-        <div className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
-          <div className="w-10 h-10 rounded-xl bg-warning-light flex items-center justify-center shrink-0"><Clock className="w-5 h-5 text-warning" /></div>
+        <div className="card-hover p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-warning-light flex items-center justify-center shrink-0"><Clock className="w-5 h-5 text-warning" /></div>
           <div className="flex-1 min-w-0">
             <p className="text-2xl font-bold text-warning-text">{loading ? '…' : waiting}</p>
             <p className="text-xs text-text-secondary">Remaining</p>
@@ -187,7 +187,7 @@ export default function DoctorDashboard() {
                 </div>
                 <button
                   onClick={() => handleCallIn(nextUp.id)}
-                  className="text-sm font-medium text-white bg-primary px-3 py-1.5 rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-1.5"
+                  className="text-sm font-medium text-white bg-primary px-3 py-1.5 rounded-xl hover:bg-primary-hover hover:scale-[1.04] active:scale-95 transition-all duration-200 flex items-center gap-1.5"
                 >
                   <PhoneCall className="w-3.5 h-3.5" /> Call In
                 </button>
@@ -214,7 +214,7 @@ export default function DoctorDashboard() {
                 <div className={`absolute top-1.5 left-0 w-5 h-5 rounded-full border-4 border-white flex items-center justify-center shrink-0 z-10 ${statusColor[app.status] ?? 'bg-warning'}`}>
                   {app.status === 'COMPLETED' && <CheckCircle2 className="w-3 h-3 text-white" />}
                 </div>
-                <div className={`p-3 rounded-lg border ${app.status === 'IN_CONSULTATION' ? 'border-primary/50 bg-primary-light shadow-sm' : 'border-brand-border bg-white'}`}>
+                <div className={`p-3 rounded-xl border transition-all duration-150 hover:shadow-sm ${app.status === 'IN_CONSULTATION' ? 'border-primary/50 bg-primary-light shadow-sm' : 'border-brand-border bg-white hover:bg-gray-50'}`}>
                   <div className="flex justify-between items-start mb-1">
                     <span className="text-xs font-bold text-text-primary">{app.timeSlot}</span>
                     <span className={`text-[10px] uppercase font-bold tracking-wider ${app.status === 'COMPLETED' ? 'text-success-text' : app.status === 'IN_CONSULTATION' ? 'text-primary' : 'text-text-muted'}`}>
