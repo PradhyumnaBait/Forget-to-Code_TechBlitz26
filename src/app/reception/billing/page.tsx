@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { FileText, IndianRupee, Plus, Printer, CheckCircle, Smartphone, Trash2, MessageSquare } from 'lucide-react'
 import PrintableInvoice from '@/components/billing/PrintableInvoice'
 
@@ -18,6 +19,7 @@ const recentBills = [
 ]
 
 export default function BillingPage() {
+  const router = useRouter()
   const [items, setItems] = useState<Item[]>([
     { id: '1', name: 'Dr. Ananya Sharma — General Consultation', qty: 1, price: 500 },
     { id: '2', name: 'Paracetamol 500mg (10 tabs)', qty: 2, price: 40 },
@@ -249,7 +251,10 @@ export default function BillingPage() {
                   </div>
                 ))}
               </div>
-              <button className="w-full mt-4 text-xs font-medium text-primary hover:text-primary-hover text-center transition-colors">
+              <button
+                onClick={() => router.push('/reception/billing/invoices')}
+                className="w-full mt-4 text-xs font-medium text-primary hover:text-primary-hover text-center transition-colors"
+              >
                 View All Invoices
               </button>
             </div>

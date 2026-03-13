@@ -2,29 +2,23 @@
 
 import { TrendingUp, Users, UserPlus, IndianRupee, Activity, Download } from 'lucide-react'
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
-  LineChart, Line
 } from 'recharts'
 
-const revenueData = [
-  { name: 'Mon', revenue: 14000 },
-  { name: 'Tue', revenue: 18500 },
-  { name: 'Wed', revenue: 15200 },
-  { name: 'Thu', revenue: 21000 },
-  { name: 'Fri', revenue: 19800 },
-  { name: 'Sat', revenue: 25400 },
-  { name: 'Sun', revenue: 0 },
+const weeklyRevenue = [
+  { day: 'Mon', revenue: 12000 },
+  { day: 'Tue', revenue: 15000 },
+  { day: 'Wed', revenue: 10000 },
+  { day: 'Thu', revenue: 18000 },
+  { day: 'Fri', revenue: 20000 },
+  { day: 'Sat', revenue: 16000 },
+  { day: 'Sun', revenue: 14000 },
 ]
 
-const patientData = [
-  { name: 'Mon', online: 15, walkin: 8 },
-  { name: 'Tue', online: 20, walkin: 12 },
-  { name: 'Wed', online: 18, walkin: 5 },
-  { name: 'Thu', online: 22, walkin: 15 },
-  { name: 'Fri', online: 24, walkin: 10 },
-  { name: 'Sat', online: 28, walkin: 18 },
-  { name: 'Sun', online: 0, walkin: 0 },
+const patientAcquisition = [
+  { type: 'Online', value: 72 },
+  { type: 'Walk-in', value: 28 },
 ]
 
 const monthlyTrend = [
@@ -113,19 +107,13 @@ export default function AnalyticsDashboard() {
             <span className="text-xs font-medium text-success bg-success-light px-2.5 py-1 rounded-full">Avg ₹16.2k/day</span>
           </div>
           <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={revenueData} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="gradR" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.22} />
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                </linearGradient>
-              </defs>
+            <LineChart data={weeklyRevenue} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94A3B8' }} dy={8} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94A3B8' }} width={46} tickFormatter={v => `₹${v / 1000}k`} />
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94A3B8' }} dy={8} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94A3B8' }} width={46} tickFormatter={(v: number) => `₹${v / 1000}k`} />
               <Tooltip content={<TT />} cursor={{ stroke: '#E2E8F0', strokeWidth: 2, strokeDasharray: '4 4' }} />
-              <Area type="monotone" dataKey="revenue" name="revenue" stroke="#10B981" strokeWidth={2.5} fill="url(#gradR)" dot={{ fill: '#10B981', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
-            </AreaChart>
+              <Line type="monotone" dataKey="revenue" name="revenue" stroke="#10B981" strokeWidth={2.5} dot={{ fill: '#10B981', r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
 
@@ -139,13 +127,19 @@ export default function AnalyticsDashboard() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={patientData} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
+            <BarChart data={patientAcquisition} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94A3B8' }} dy={8} />
+              <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94A3B8' }} dy={8} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94A3B8' }} width={28} />
-              <Tooltip content={<TT />} cursor={{ fill: '#F8FAFC' }} />
-              <Bar dataKey="online" name="online" stackId="a" fill="#3B82F6" radius={[0, 0, 4, 4]} barSize={26} />
-              <Bar dataKey="walkin" name="walkin" stackId="a" fill="#6366F1" radius={[4, 4, 0, 0]} />
+              <Tooltip
+                formatter={(v: number, n: string) => [`${v}%`, n]}
+                cursor={{ fill: '#F8FAFC' }}
+              />
+              <Bar dataKey="value" radius={8} barSize={48}>
+                {patientAcquisition.map((entry, i) => (
+                  <Cell key={entry.type} fill={i === 0 ? '#3B82F6' : '#6366F1'} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

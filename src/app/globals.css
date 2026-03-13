@@ -129,4 +129,24 @@
     from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* Print-only invoice: hide everything except the invoice container when printing */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    #print-invoice,
+    #print-invoice * {
+      visibility: visible;
+    }
+
+    #print-invoice {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+  }
 }
