@@ -42,13 +42,7 @@ export default function ReceptionLoginPage() {
         setError(data.message ?? 'Invalid credentials')
       }
     } catch {
-      // Backend offline — try hardcoded credentials for demo
-      if (email !== RECEPTION_EMAIL || password !== RECEPTION_PASSWORD) {
-        setError('Invalid credentials. Check your email and password.')
-        setLoading(false); return
-      }
-      loginStaff('reception')
-      router.push('/reception')
+      setError('Network error. Please check if the backend server is running.')
     } finally {
       setLoading(false)
     }
@@ -67,7 +61,7 @@ export default function ReceptionLoginPage() {
 
         <div className="card p-6 shadow-md">
           <div className="bg-accent-light border border-accent/20 rounded-xl px-4 py-3 mb-5 text-xs text-accent font-medium">
-            🔑 Use your clinic credentials to sign in
+            🔑 Demo Mode: Use any email and password to sign in
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -75,7 +69,7 @@ export default function ReceptionLoginPage() {
               <label className="label">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input type="email" className="input pl-9" placeholder="reception@meddesk.in"
+                <input type="email" className="input pl-9" placeholder="any-email@example.com"
                   value={email} onChange={e => setEmail(e.target.value)} />
               </div>
             </div>
@@ -84,7 +78,7 @@ export default function ReceptionLoginPage() {
               <label className="label">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input type={showPw ? 'text' : 'password'} className="input pl-9 pr-10" placeholder="••••••••"
+                <input type={showPw ? 'text' : 'password'} className="input pl-9 pr-10" placeholder="any-password"
                   value={password} onChange={e => setPassword(e.target.value)} />
                 <button type="button" onClick={() => setShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

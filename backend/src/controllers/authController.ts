@@ -121,21 +121,10 @@ export const staffLogin = async (
       role: z.enum(['doctor', 'reception']),
     }).parse(req.body);
 
-    // Read credentials from env, fall back to demo defaults
-    const validCredentials: Record<string, { user: string; pass: string }> = {
-      doctor: {
-        user: process.env['DOCTOR_USERNAME'] ?? 'doctor',
-        pass: process.env['DOCTOR_PASSWORD'] ?? 'meddesk123',
-      },
-      reception: {
-        user: process.env['RECEPTION_USERNAME'] ?? 'reception',
-        pass: process.env['RECEPTION_PASSWORD'] ?? 'meddesk123',
-      },
-    };
-
-    const creds = validCredentials[role];
-    if (!creds || username !== creds.user || password !== creds.pass) {
-      res.status(401).json(errorResponse('Invalid username or password'));
+    // DEMO MODE: Accept any username/password for staff login
+    // In production, you should validate against a proper user database
+    if (!username || !password || username.length < 2 || password.length < 2) {
+      res.status(401).json(errorResponse('Please provide valid username and password'));
       return;
     }
 

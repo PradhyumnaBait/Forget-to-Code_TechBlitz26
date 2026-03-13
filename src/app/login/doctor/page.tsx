@@ -42,13 +42,7 @@ export default function DoctorLoginPage() {
         setError(data.message ?? 'Invalid credentials')
       }
     } catch {
-      // Backend offline — fall back to hardcoded credentials
-      if (email !== DOCTOR_EMAIL || password !== DOCTOR_PASSWORD) {
-        setError('Invalid credentials. Check your email and password.')
-        setLoading(false); return
-      }
-      loginStaff('doctor')
-      router.push('/doctor')
+      setError('Network error. Please check if the backend server is running.')
     } finally {
       setLoading(false)
     }
@@ -67,7 +61,7 @@ export default function DoctorLoginPage() {
 
         <div className="card p-6 shadow-md">
           <div className="bg-primary-light border border-primary/20 rounded-xl px-4 py-3 mb-5 text-xs text-primary font-medium">
-            🔑 Use your clinic credentials to sign in
+            🔑 Demo Mode: Use any email and password to sign in
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -78,7 +72,7 @@ export default function DoctorLoginPage() {
                 <input
                   type="email"
                   className="input pl-9"
-                  placeholder="doctor@meddesk.in"
+                  placeholder="any-email@example.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                 />
@@ -92,7 +86,7 @@ export default function DoctorLoginPage() {
                 <input
                   type={showPw ? 'text' : 'password'}
                   className="input pl-9 pr-10"
-                  placeholder="••••••••"
+                  placeholder="any-password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                 />
