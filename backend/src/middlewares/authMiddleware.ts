@@ -22,6 +22,22 @@ export const authMiddleware = async (
 
     const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload;
     req.userId = decoded.userId;
+
+    // Populate req.patient if the userId maps to a patient
+    try {
+      const patient = await prisma.patient.findUnique({
+        where: { id: decoded.userId },
+        select: { id: true, name: true, phone: true, age: true, gender: true },
+      });
+      if (patient) {
+        req.patient = {
+          ...patient,
+          age: patient.age ?? undefined,
+          gender: patient.gender ?? undefined,
+        };
+      }
+    } catch { /* Non-critical — continue without patient context */ }
+
     next();
   } catch {
     res
@@ -29,6 +45,7 @@ export const authMiddleware = async (
       .json({ success: false, message: 'Invalid or expired token' });
   }
 };
+
 
 export const requireRole = (allowedRoles: string[]) => {
   return async (

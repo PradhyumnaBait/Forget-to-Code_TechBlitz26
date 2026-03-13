@@ -4,28 +4,59 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Stethoscope, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react'
+import { useAuth } from '@/lib/authContext'
+
+// Hardcoded demo credentials for staff (doctor login)
+const DOCTOR_EMAIL = 'doctor@meddesk.in'
+const DOCTOR_PASSWORD = 'MedDesk@2026'
 
 export default function DoctorLoginPage() {
   const router = useRouter()
+  const { loginStaff } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api'
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!email || !password) { setError('Please fill in all fields.'); return }
-    // Demo: any credentials work
     setLoading(true)
-    setTimeout(() => router.push('/doctor'), 1000)
+    try {
+      const username = email.split('@')[0]   // 'doctor'
+      const res = await fetch(`${BASE}/auth/staff-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role: 'doctor' }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        localStorage.setItem('md_token', data.data.token)
+        loginStaff('doctor')
+        router.push('/doctor')
+      } else {
+        setError(data.message ?? 'Invalid credentials')
+      }
+    } catch {
+      // Backend offline — fall back to hardcoded credentials
+      if (email !== DOCTOR_EMAIL || password !== DOCTOR_PASSWORD) {
+        setError('Invalid credentials. Check your email and password.')
+        setLoading(false); return
+      }
+      loginStaff('doctor')
+      router.push('/doctor')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-brand-bg flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
-        {/* Icon */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-md mb-4">
             <Stethoscope className="w-8 h-8 text-white" />
@@ -35,13 +66,11 @@ export default function DoctorLoginPage() {
         </div>
 
         <div className="card p-6 shadow-md">
-          {/* Demo hint */}
           <div className="bg-primary-light border border-primary/20 rounded-xl px-4 py-3 mb-5 text-xs text-primary font-medium">
-            🔑 Demo mode — enter any email & password to continue
+            🔑 Use your clinic credentials to sign in
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Email */}
             <div>
               <label className="label">Email Address</label>
               <div className="relative">
@@ -56,7 +85,6 @@ export default function DoctorLoginPage() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label className="label">Password</label>
               <div className="relative">
@@ -79,14 +107,6 @@ export default function DoctorLoginPage() {
                 <AlertCircle className="w-4 h-4 shrink-0" /> {error}
               </div>
             )}
-
-            <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 text-text-secondary cursor-pointer">
-                <input type="checkbox" className="rounded border-brand-border text-primary" />
-                Remember me
-              </label>
-              <button type="button" className="text-primary hover:underline font-medium">Forgot password?</button>
-            </div>
 
             <button
               type="submit"

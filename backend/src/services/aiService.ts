@@ -70,40 +70,62 @@ Analyze the user message and return ONLY a JSON object with:
     conversationHistory: { role: 'user' | 'assistant'; content: string }[] = []
   ): Promise<string> {
     if (!openaiClient) {
+      console.log('[AI] OpenAI client not initialized — returning mock response');
       return this.mockChat(message);
     }
 
     try {
-      // Get available slots for context
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split('T')[0];
-      const slots = await slotService.getAvailableSlots(tomorrowStr);
+      // Get available slots for context (non-blocking)
+      let slotsContext = '';
+      try {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        const slots = await slotService.getAvailableSlots(tomorrowStr);
+        if (slots.length > 0) {
+          slotsContext = `\nAvailable slots for tomorrow (${tomorrowStr}): ${slots.slice(0, 6).join(', ')}${slots.length > 6 ? ' and more' : ''}`;
+        }
+      } catch { /* Non-critical — continue without slot context */ }
 
       const response = await openaiClient.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `${SYSTEM_PROMPT}
-Available slots for tomorrow (${tomorrowStr}): ${slots.slice(0, 5).join(', ')}${slots.length > 5 ? ' and more' : ''}`,
+            content: `${SYSTEM_PROMPT}${slotsContext}`,
           },
-          ...conversationHistory,
+          ...conversationHistory.slice(-10), // keep last 10 messages for context
           { role: 'user', content: message },
         ],
         temperature: 0.7,
         max_tokens: 500,
       });
 
-      return (
-        response.choices[0]?.message?.content ||
-        'I apologize, I could not process your request. Please try again.'
-      );
-    } catch (err) {
-      console.error('[AI chat error]', err);
-      return 'I am currently unavailable. Please call the clinic directly.';
+      const reply = response.choices[0]?.message?.content;
+      if (reply) return reply;
+      return 'I apologize, I could not process your request. Please try again.';
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.error('[AI chat error]', errMsg);
+
+      // Provide a helpful context-aware response instead of generic error
+      const lower = message.toLowerCase();
+      if (lower.includes('book') || lower.includes('appointment')) {
+        return 'I can help you book an appointment! Please use the "Book Appointment" button in the navigation to proceed through our booking flow.';
+      }
+      if (lower.includes('hour') || lower.includes('timing') || lower.includes('time')) {
+        return 'The clinic is open Monday–Saturday, 9:00 AM to 6:00 PM.';
+      }
+      if (lower.includes('fee') || lower.includes('cost') || lower.includes('price')) {
+        return 'The consultation fee is ₹500. Payment can be made via UPI or at the clinic.';
+      }
+      if (lower.includes('cancel')) {
+        return 'To cancel your appointment, please call the clinic directly or visit the reception desk with your appointment ID.';
+      }
+      return 'Hello! I can help you with booking appointments, clinic hours, and general queries. What would you like to know?';
     }
   }
+
 
   async handleWhatsAppMessage(
     phone: string,

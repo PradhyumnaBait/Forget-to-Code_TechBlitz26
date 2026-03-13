@@ -5,12 +5,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { User, Phone, Hash, FileText, ArrowRight, AlertCircle } from 'lucide-react'
 import StepProgressBar from '@/components/booking/StepProgressBar'
+import { authApi } from '@/lib/api'
 
 export default function PatientDetailsPage() {
   const router = useRouter()
   const [form, setForm] = useState({ name: '', phone: '', age: '', symptoms: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const [apiError, setApiError] = useState('')
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -19,16 +21,23 @@ export default function PatientDetailsPage() {
     return e
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setApiError('')
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
-    // Simulate OTP send
-    setTimeout(() => {
-      sessionStorage.setItem('md_patient', JSON.stringify(form))
+    try {
+      const phone = `+91${form.phone}`
+      await authApi.sendOtp(phone)
+      // Persist form to sessionStorage for next steps
+      sessionStorage.setItem('md_patient', JSON.stringify({ ...form, phone }))
       router.push('/book/verify-otp')
-    }, 800)
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Failed to send OTP. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -127,7 +136,12 @@ export default function PatientDetailsPage() {
             </div>
           </div>
 
-          {/* Submit */}
+          {apiError && (
+            <p className="flex items-center gap-1.5 text-sm text-danger bg-danger/5 border border-danger/20 rounded-lg px-3 py-2">
+              <AlertCircle className="w-4 h-4 shrink-0" /> {apiError}
+            </p>
+          )}
+
           <button
             type="submit"
             disabled={loading}
@@ -136,10 +150,7 @@ export default function PatientDetailsPage() {
             {loading ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <>
-                Send OTP
-                <ArrowRight className="w-4 h-4" />
-              </>
+              <>Send OTP <ArrowRight className="w-4 h-4" /></>
             )}
           </button>
         </form>

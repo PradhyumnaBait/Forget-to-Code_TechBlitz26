@@ -9,6 +9,14 @@ export interface AuthRequest extends Request {
     name: string;
     role: string;
   };
+  // Patient decoded from JWT (for patient-facing routes)
+  patient?: {
+    id: string;
+    name: string;
+    phone: string;
+    age?: number;
+    gender?: string;
+  };
 }
 
 export interface JWTPayload {

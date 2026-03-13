@@ -1,17 +1,34 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ShieldCheck, AlertCircle, ArrowRight, RefreshCw } from 'lucide-react'
 import StepProgressBar from '@/components/booking/StepProgressBar'
+import { authApi } from '@/lib/api'
+import { useAuth } from '@/lib/authContext'
 
 export default function VerifyOtpPage() {
   const router = useRouter()
+  const { loginPatient } = useAuth()
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(45)
+  const [resendLoading, setResendLoading] = useState(false)
   const refs = useRef<(HTMLInputElement | null)[]>([])
+
+  // Read patient info persisted from previous step
+  const patientRaw = typeof window !== 'undefined' ? sessionStorage.getItem('md_patient') : null
+  const patient = patientRaw ? JSON.parse(patientRaw) : null
+  const phone: string = patient?.phone ?? ''
+  const displayPhone = phone.replace('+91', '')
+
+  // Countdown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const t = setTimeout(() => setResendCooldown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [resendCooldown])
 
   const handleInput = (i: number, val: string) => {
     if (!/^\d?$/.test(val)) return
@@ -26,12 +43,46 @@ export default function VerifyOtpPage() {
     if (e.key === 'Backspace' && !otp[i] && i > 0) refs.current[i - 1]?.focus()
   }
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const code = otp.join('')
     if (code.length < 6) { setError('Please enter the complete 6-digit OTP'); return }
-    if (code !== '123456') { setError('Invalid OTP. Please try again.'); return }
     setLoading(true)
-    setTimeout(() => router.push('/book/select-date'), 800)
+    setError('')
+    try {
+      const res = await authApi.verifyOtp(
+        phone,
+        code,
+        patient?.name,
+        patient?.age ? Number(patient.age) : undefined
+      )
+      if (res.success && res.data?.token) {
+        loginPatient(res.data.token, res.data.patient as any)
+        router.push('/book/select-date')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid OTP. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResend = useCallback(async () => {
+    if (!phone) return
+    setResendLoading(true)
+    try {
+      await authApi.sendOtp(phone)
+      setResendCooldown(45)
+      setError('')
+    } catch (err) {
+      setError('Could not resend OTP. Please try again.')
+    } finally {
+      setResendLoading(false)
+    }
+  }, [phone])
+
+  if (!phone) {
+    router.replace('/book/patient-details')
+    return null
   }
 
   return (
@@ -39,16 +90,15 @@ export default function VerifyOtpPage() {
       <StepProgressBar currentStep={2} />
 
       <div className="card p-6 shadow-md">
-        {/* Icon + title */}
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center mb-4">
             <ShieldCheck className="w-7 h-7 text-primary" />
           </div>
           <h1 className="text-xl font-bold text-text-primary">Verify Your Phone</h1>
           <p className="text-sm text-text-secondary mt-1">
-            We've sent a 6-digit OTP to <strong>+91 98765 43210</strong>
+            We've sent a 6-digit OTP to <strong>+91 {displayPhone}</strong>
           </p>
-          <p className="text-xs text-text-muted mt-1">OTP expires in 10 minutes · Use 123456 to test</p>
+          <p className="text-xs text-text-muted mt-1">OTP expires in 5 minutes</p>
         </div>
 
         {/* OTP inputs */}
@@ -74,7 +124,6 @@ export default function VerifyOtpPage() {
           ))}
         </div>
 
-        {/* Error */}
         {error && (
           <div className="flex items-center justify-center gap-1.5 text-sm text-danger mb-4">
             <AlertCircle className="w-4 h-4" />
@@ -82,7 +131,6 @@ export default function VerifyOtpPage() {
           </div>
         )}
 
-        {/* Verify button */}
         <button
           onClick={handleVerify}
           disabled={loading}
@@ -95,16 +143,16 @@ export default function VerifyOtpPage() {
           )}
         </button>
 
-        {/* Resend */}
         <p className="text-center text-sm text-text-muted mt-4">
           {resendCooldown > 0 ? (
             <>Resend in <span className="font-medium text-text-secondary">0:{String(resendCooldown).padStart(2, '0')}</span></>
           ) : (
             <button
-              onClick={() => setResendCooldown(45)}
-              className="flex items-center gap-1 text-primary font-medium mx-auto hover:text-primary-hover"
+              onClick={handleResend}
+              disabled={resendLoading}
+              className="flex items-center gap-1 text-primary font-medium mx-auto hover:text-primary-hover disabled:opacity-50"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> Resend OTP
+              <RefreshCw className="w-3.5 h-3.5" /> {resendLoading ? 'Sending…' : 'Resend OTP'}
             </button>
           )}
         </p>

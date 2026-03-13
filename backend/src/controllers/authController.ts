@@ -107,3 +107,49 @@ export const updateProfile = async (
     next(err);
   }
 };
+
+// Staff login — validates configured credentials and issues a JWT
+export const staffLogin = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { username, password, role } = z.object({
+      username: z.string(),
+      password: z.string(),
+      role: z.enum(['doctor', 'reception']),
+    }).parse(req.body);
+
+    // Read credentials from env, fall back to demo defaults
+    const validCredentials: Record<string, { user: string; pass: string }> = {
+      doctor: {
+        user: process.env['DOCTOR_USERNAME'] ?? 'doctor',
+        pass: process.env['DOCTOR_PASSWORD'] ?? 'meddesk123',
+      },
+      reception: {
+        user: process.env['RECEPTION_USERNAME'] ?? 'reception',
+        pass: process.env['RECEPTION_PASSWORD'] ?? 'meddesk123',
+      },
+    };
+
+    const creds = validCredentials[role];
+    if (!creds || username !== creds.user || password !== creds.pass) {
+      res.status(401).json(errorResponse('Invalid username or password'));
+      return;
+    }
+
+    // Issue a JWT — userId = `staff:{role}` so it won't collide with patient IDs
+    const jwt = await import('jsonwebtoken');
+    const token = jwt.default.sign(
+      { userId: `staff:${role}`, role },
+      process.env['JWT_SECRET'] ?? 'meddesk-secret',
+      { expiresIn: '12h' }
+    );
+
+    res.json(successResponse('Staff login successful', { token, role }));
+  } catch (err) {
+    next(err);
+  }
+};
+
