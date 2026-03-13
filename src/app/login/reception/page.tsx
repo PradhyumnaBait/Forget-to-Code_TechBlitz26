@@ -18,17 +18,40 @@ export default function ReceptionLoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api'
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!email || !password) { setError('Please fill in all fields.'); return }
-    if (email !== RECEPTION_EMAIL || password !== RECEPTION_PASSWORD) {
-      setError('Invalid credentials. Check your email and password.')
-      return
-    }
     setLoading(true)
-    loginStaff('reception')
-    setTimeout(() => router.push('/reception'), 500)
+    try {
+      // Map email to username for backend
+      const username = email.split('@')[0]  // e.g. 'reception'
+      const res = await fetch(`${BASE}/auth/staff-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role: 'reception' }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        localStorage.setItem('md_token', data.data.token)
+        loginStaff('reception')
+        router.push('/reception')
+      } else {
+        setError(data.message ?? 'Invalid credentials')
+      }
+    } catch {
+      // Backend offline — try hardcoded credentials for demo
+      if (email !== RECEPTION_EMAIL || password !== RECEPTION_PASSWORD) {
+        setError('Invalid credentials. Check your email and password.')
+        setLoading(false); return
+      }
+      loginStaff('reception')
+      router.push('/reception')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

@@ -19,19 +19,39 @@ export default function DoctorLoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api'
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!email || !password) { setError('Please fill in all fields.'); return }
-
-    // For staff login we use configured credentials (no OTP flow needed for clinic staff)
-    if (email !== DOCTOR_EMAIL || password !== DOCTOR_PASSWORD) {
-      setError('Invalid credentials. Check your email and password.')
-      return
-    }
     setLoading(true)
-    loginStaff('doctor')
-    setTimeout(() => router.push('/doctor'), 500)
+    try {
+      const username = email.split('@')[0]   // 'doctor'
+      const res = await fetch(`${BASE}/auth/staff-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role: 'doctor' }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        localStorage.setItem('md_token', data.data.token)
+        loginStaff('doctor')
+        router.push('/doctor')
+      } else {
+        setError(data.message ?? 'Invalid credentials')
+      }
+    } catch {
+      // Backend offline — fall back to hardcoded credentials
+      if (email !== DOCTOR_EMAIL || password !== DOCTOR_PASSWORD) {
+        setError('Invalid credentials. Check your email and password.')
+        setLoading(false); return
+      }
+      loginStaff('doctor')
+      router.push('/doctor')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

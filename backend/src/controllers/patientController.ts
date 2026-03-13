@@ -147,3 +147,26 @@ export const searchPatients = async (
     next(err);
   }
 };
+
+export const deletePatient = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json(errorResponse('Patient ID required'));
+      return;
+    }
+    await prisma.patient.delete({ where: { id } });
+    res.json(successResponse('Patient record deleted'));
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message?.includes('Record to delete does not exist')) {
+      res.status(404).json(errorResponse('Patient not found'));
+      return;
+    }
+    next(err);
+  }
+};
+

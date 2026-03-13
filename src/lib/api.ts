@@ -161,6 +161,8 @@ export const patientApi = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+  delete: (id: string) =>
+    request<{ success: boolean }>(`/patients/${id}`, { method: 'DELETE' }),
 };
 
 // ─── Consultation ────────────────────────────────────────────────────────
