@@ -1,15 +1,161 @@
 'use client'
 
-import { useState } from 'react'
-import { FileText, IndianRupee, Plus, Printer, CheckCircle, Smartphone, Trash2, MessageSquare } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import {
+  FileText, IndianRupee, Plus, Printer, CheckCircle, Smartphone,
+  Trash2, MessageSquare, Search, X, Loader2, Save, Percent
+} from 'lucide-react'
 import PrintableInvoice from '@/components/billing/PrintableInvoice'
+import { patientApi } from '@/lib/api'
 
+// ─── Types ───────────────────────────────────────────────────────────────────
 interface Item {
   id: string
   name: string
+  description: string
   qty: number
   price: number
 }
+
+interface PatientInfo {
+  id: string
+  name: string
+  phone: string
+}
+
+// ─── Add Item Modal ───────────────────────────────────────────────────────────
+function AddItemModal({ onAdd, onClose }: { onAdd: (item: Omit<Item,'id'>) => void; onClose: () => void }) {
+  const [form, setForm] = useState({ name: '', description: '', qty: 1, price: 0 })
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm(f => ({ ...f, [k]: k === 'qty' || k === 'price' ? Number(e.target.value) || 0 : e.target.value }))
+
+  const handleAdd = () => {
+    if (!form.name.trim()) return
+    onAdd(form)
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        <div className="flex items-center justify-between p-5 border-b border-brand-border">
+          <h2 className="text-base font-bold text-text-primary">Add Item / Medicine</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-brand-bg text-text-muted"><X className="w-4 h-4" /></button>
+        </div>
+        <div className="p-5 space-y-3">
+          <div>
+            <label className="label">Item / Medicine Name *</label>
+            <input className="input" placeholder="e.g. Paracetamol 500mg (10 tabs)" value={form.name} onChange={set('name')} autoFocus />
+          </div>
+          <div>
+            <label className="label">Description / Notes</label>
+            <input className="input" placeholder="e.g. For fever, take 1 tab thrice daily — optional" value={form.description} onChange={set('description')} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label">Quantity</label>
+              <input type="number" min={1} className="input" value={form.qty} onChange={set('qty')} />
+            </div>
+            <div>
+              <label className="label">Unit Price (₹)</label>
+              <input type="number" min={0} className="input" value={form.price} onChange={set('price')} />
+            </div>
+          </div>
+          <div className="flex items-center justify-between py-2.5 border-t border-brand-border mt-1">
+            <span className="text-sm text-text-secondary">Line Total</span>
+            <span className="text-base font-bold text-primary">₹{(form.qty * form.price).toLocaleString()}</span>
+          </div>
+          <div className="flex gap-3 pt-1">
+            <button onClick={onClose} className="flex-1 btn-outline py-2.5 text-sm">Cancel</button>
+            <button onClick={handleAdd} disabled={!form.name.trim()}
+              className="flex-1 btn-primary py-2.5 text-sm flex items-center justify-center gap-2 disabled:opacity-50">
+              <Save className="w-4 h-4" /> Add to Bill
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Patient Search ───────────────────────────────────────────────────────────
+function PatientSearch({ onSelect }: { onSelect: (p: PatientInfo) => void }) {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<PatientInfo[]>([])
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const search = useCallback(async (q: string) => {
+    if (!q.trim()) { setResults([]); return }
+    setLoading(true)
+    try {
+      const res = await patientApi.list(q) as any
+      setResults((res.data?.patients ?? []).slice(0, 8))
+    } catch {
+      // fallback demo patients
+      const demoPatients: PatientInfo[] = [
+        { id: 'P001', name: 'Rahul Mehta', phone: '9876543210' },
+        { id: 'P002', name: 'Priya Singh', phone: '9988776655' },
+        { id: 'P003', name: 'Amit Kumar', phone: '9123456789' },
+        { id: 'P004', name: 'Sona Rajan', phone: '9009988776' },
+      ].filter(p => p.name.toLowerCase().includes(q.toLowerCase()) || p.phone.includes(q))
+      setResults(demoPatients)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const t = setTimeout(() => search(query), 250)
+    return () => clearTimeout(t)
+  }, [query, search])
+
+  // Close on outside click
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+
+  return (
+    <div className="relative" ref={ref}>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+        <input
+          className="input pl-9 h-9 text-sm w-64"
+          placeholder="Search patient by name or phone…"
+          value={query}
+          onChange={e => { setQuery(e.target.value); setOpen(true) }}
+          onFocus={() => setOpen(true)}
+        />
+        {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 animate-spin text-text-muted" />}
+      </div>
+      {open && (query.trim().length > 0) && (
+        <div className="absolute top-full mt-1 left-0 w-full min-w-[280px] bg-white border border-brand-border rounded-xl shadow-lg z-30 overflow-hidden">
+          {results.length === 0 && !loading && (
+            <div className="px-4 py-3 text-xs text-text-muted">No patients found.</div>
+          )}
+          {results.map(p => (
+            <button key={p.id} onClick={() => { onSelect(p); setQuery(p.name); setOpen(false) }}
+              className="w-full text-left px-4 py-2.5 hover:bg-brand-bg transition-colors border-b border-brand-border last:border-0">
+              <div className="text-sm font-semibold text-text-primary">{p.name}</div>
+              <div className="text-xs text-text-muted">{p.phone} · {p.id}</div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Main Billing Page ────────────────────────────────────────────────────────
+const DEFAULT_ITEMS: Item[] = [
+  { id: '1', name: 'Dr. Ananya Sharma — General Consultation', description: 'General OPD visit', qty: 1, price: 500 },
+  { id: '2', name: 'Paracetamol 500mg (10 tabs)', description: 'For fever & pain relief', qty: 2, price: 40 },
+  { id: '3', name: 'Cetirizine 10mg (10 tabs)', description: 'Antihistamine for allergy', qty: 1, price: 25 },
+  { id: '4', name: 'Vitamin D3 60k (4 caps)', description: 'Vitamin D supplement', qty: 1, price: 120 },
+]
 
 const recentBills = [
   { id: '#MED-0318-006', patient: 'Priya Singh', amt: '₹1,240', time: '10:30 AM' },
@@ -18,24 +164,21 @@ const recentBills = [
 ]
 
 export default function BillingPage() {
-  const [items, setItems] = useState<Item[]>([
-    { id: '1', name: 'Dr. Ananya Sharma — General Consultation', qty: 1, price: 500 },
-    { id: '2', name: 'Paracetamol 500mg (10 tabs)', qty: 2, price: 40 },
-    { id: '3', name: 'Cetirizine 10mg (10 tabs)', qty: 1, price: 25 },
-    { id: '4', name: 'Vitamin D3 60k (4 caps)', qty: 1, price: 120 },
-  ])
-  const [discount, setDiscount] = useState(0)
+  const [items, setItems] = useState<Item[]>(DEFAULT_ITEMS)
+  const [discountPct, setDiscountPct] = useState(0)   // percentage discount
   const [payMode, setPayMode] = useState<'upi' | 'cash'>('upi')
   const [received, setReceived] = useState('700')
   const [sent, setSent] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [patient, setPatient] = useState<PatientInfo>({ id: 'P001', name: 'Rahul Mehta', phone: '9876543210' })
 
-  const subtotal = items.reduce((acc, curr) => acc + (curr.price * curr.qty), 0)
-  const total = subtotal - discount
+  const subtotal = items.reduce((acc, i) => acc + i.price * i.qty, 0)
+  const discountAmt = Math.round(subtotal * discountPct / 100)
+  const total = subtotal - discountAmt
   const change = payMode === 'cash' ? Math.max(0, parseInt(received || '0') - total) : 0
 
-  const addItem = () => {
-    setItems(prev => [...prev, { id: String(Date.now()), name: 'New Item', qty: 1, price: 0 }])
-  }
+  const addItem = (data: Omit<Item,'id'>) =>
+    setItems(prev => [...prev, { ...data, id: String(Date.now()) }])
 
   const removeItem = (id: string) => setItems(prev => prev.filter(i => i.id !== id))
 
@@ -48,40 +191,46 @@ export default function BillingPage() {
   }
 
   const handlePrint = () => window.print()
+  const handleSendDigital = () => { setSent(true); setTimeout(() => setSent(false), 3000) }
 
-  const handleSendDigital = () => {
-    setSent(true)
-    setTimeout(() => setSent(false), 3000)
-  }
+  const invoiceId = `#MED-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${String(Math.floor(Math.random()*900+100))}`
+  const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
     <>
-      {/* Print-only invoice (hidden on screen, shown when printing) */}
+      {/* Print invoice */}
       <div className="hidden print:block">
         <PrintableInvoice
-          invoiceId="#MED-20260313-007"
-          date="March 13, 2026"
-          patientName="Rahul Mehta"
+          invoiceId={invoiceId}
+          date={today}
+          patientName={patient.name}
           doctorName="Dr. Ananya Sharma"
           items={items}
-          discount={discount}
+          discount={discountAmt}
           payMode={payMode === 'upi' ? 'UPI / Card' : 'Cash'}
         />
       </div>
 
-      {/* Main billing UI (hidden when printing) */}
       <div className="p-6 print:hidden">
+        {/* Header with patient search */}
         <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold text-text-primary">Generate Bill</h1>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-2">
               <div className="flex items-center gap-1.5">
-                <span className="w-8 h-8 rounded-full bg-accent-light text-accent flex items-center justify-center text-sm font-bold">RM</span>
-                <p className="text-sm font-semibold text-text-primary">Rahul Mehta</p>
+                <span className="w-8 h-8 rounded-full bg-accent-light text-accent flex items-center justify-center text-sm font-bold shrink-0">
+                  {patient.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </span>
+                <p className="text-sm font-semibold text-text-primary">{patient.name}</p>
               </div>
-              <div className="text-xs text-text-muted px-2 border-l border-brand-border h-4 flex items-center">ID: #MED-20260313-007</div>
-              <div className="text-xs text-text-muted px-2 border-l border-brand-border h-4 flex items-center">Mar 13, 2026</div>
+              <div className="text-xs text-text-muted px-2 border-l border-brand-border h-4 flex items-center">{patient.phone}</div>
+              <div className="text-xs text-text-muted px-2 border-l border-brand-border h-4 flex items-center">{today}</div>
             </div>
+          </div>
+          {/* Patient search */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-muted font-medium shrink-0">Change patient:</span>
+            <PatientSearch onSelect={setPatient} />
           </div>
         </div>
 
@@ -90,21 +239,26 @@ export default function BillingPage() {
           <div className="lg:col-span-3 space-y-5">
             {/* Bill items */}
             <div className="card shadow-sm overflow-hidden">
+              {/* Column headers */}
               <div className="bg-brand-bg px-5 py-3 border-b border-brand-border grid grid-cols-12 gap-3 text-xs font-semibold text-text-secondary uppercase">
                 <div className="col-span-6">Description</div>
                 <div className="col-span-2 text-center">Qty</div>
                 <div className="col-span-2 text-right">Unit Price</div>
                 <div className="col-span-2 text-right">Amount</div>
               </div>
+
               <div className="divide-y divide-brand-border">
                 {items.map(item => (
-                  <div key={item.id} className="grid grid-cols-12 gap-2 px-5 py-3 items-center hover:bg-brand-bg/50 transition-colors group">
+                  <div key={item.id} className="grid grid-cols-12 gap-2 px-5 py-3 items-start hover:bg-brand-bg/50 transition-colors group">
                     <div className="col-span-6">
                       <input
                         className="w-full text-sm font-medium text-text-primary bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary/30 rounded px-1 py-0.5"
                         value={item.name}
                         onChange={e => updateItem(item.id, 'name', e.target.value)}
                       />
+                      {item.description && (
+                        <p className="text-xs text-text-muted pl-1 mt-0.5">{item.description}</p>
+                      )}
                     </div>
                     <div className="col-span-2 flex justify-center">
                       <input
@@ -123,7 +277,7 @@ export default function BillingPage() {
                       />
                     </div>
                     <div className="col-span-2 flex items-center justify-end gap-2">
-                      <span className="text-sm font-semibold text-text-primary">₹{item.price * item.qty}</span>
+                      <span className="text-sm font-semibold text-text-primary">₹{(item.price * item.qty).toLocaleString()}</span>
                       <button onClick={() => removeItem(item.id)} className="opacity-0 group-hover:opacity-100 p-1 rounded text-text-muted hover:text-danger transition-all">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -131,10 +285,11 @@ export default function BillingPage() {
                   </div>
                 ))}
               </div>
+
               <div className="px-5 py-3 border-t border-brand-border bg-white">
                 <button
-                  onClick={addItem}
-                  className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover transition-colors"
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover transition-colors hover:bg-primary-light rounded-lg px-2 py-1"
                 >
                   <Plus className="w-4 h-4" /> Add Item
                 </button>
@@ -150,16 +305,25 @@ export default function BillingPage() {
                     <span>Subtotal</span>
                     <span className="font-medium text-text-primary">₹{subtotal.toLocaleString()}</span>
                   </div>
+
+                  {/* Percentage discount */}
                   <div className="flex justify-between items-center text-sm text-text-secondary">
                     <span>Discount</span>
-                    <div className="w-24 relative">
-                      <IndianRupee className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-text-muted" />
-                      <input
-                        type="number"
-                        value={discount}
-                        onChange={e => setDiscount(Number(e.target.value) || 0)}
-                        className="w-full pl-6 pr-2 py-1 text-sm border border-brand-border rounded text-right focus:outline-none focus:border-primary"
-                      />
+                    <div className="flex items-center gap-2">
+                      <div className="w-32 relative">
+                        <Percent className="w-3.5 h-3.5 absolute right-6 top-1/2 -translate-y-1/2 text-text-muted" />
+                        <input
+                          type="number"
+                          value={discountPct}
+                          min={0}
+                          max={100}
+                          onChange={e => setDiscountPct(Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
+                          className="w-full pr-8 pl-2 py-1 text-sm border border-brand-border rounded text-right focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                      {discountAmt > 0 && (
+                        <span className="text-xs font-medium text-danger whitespace-nowrap">−₹{discountAmt}</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -173,20 +337,16 @@ export default function BillingPage() {
               <div className="card p-5">
                 <p className="text-sm font-semibold text-text-primary mb-3">Payment Method</p>
                 <div className="flex gap-2 mb-4">
-                  <button
-                    onClick={() => setPayMode('upi')}
+                  <button onClick={() => setPayMode('upi')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg border flex items-center justify-center gap-2 transition-all ${
                       payMode === 'upi' ? 'bg-primary-light border-primary text-primary' : 'bg-white border-brand-border text-text-secondary'
-                    }`}
-                  >
+                    }`}>
                     <Smartphone className="w-4 h-4" /> UPI / Card
                   </button>
-                  <button
-                    onClick={() => setPayMode('cash')}
+                  <button onClick={() => setPayMode('cash')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg border flex items-center justify-center gap-2 transition-all ${
                       payMode === 'cash' ? 'bg-primary-light border-primary text-primary' : 'bg-white border-brand-border text-text-secondary'
-                    }`}
-                  >
+                    }`}>
                     <IndianRupee className="w-4 h-4" /> Cash
                   </button>
                 </div>
@@ -210,20 +370,14 @@ export default function BillingPage() {
                 )}
 
                 <div className="space-y-2 mt-auto pt-2">
-                  <button
-                    onClick={handlePrint}
-                    className="w-full btn-primary py-2.5 flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform"
-                  >
-                    <Printer className="w-4 h-4" /> Generate Bill &amp; Print
+                  <button onClick={handlePrint} className="w-full btn-primary py-2.5 flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform">
+                    <Printer className="w-4 h-4" /> Generate Bill & Print
                   </button>
-                  <button
-                    onClick={handleSendDigital}
+                  <button onClick={handleSendDigital}
                     className={`w-full py-2.5 rounded-lg border font-medium flex items-center justify-center gap-2 transition-all text-sm ${
-                      sent
-                        ? 'border-success bg-success-light text-success-text'
-                        : 'border-[#25D366] text-[#25D366] hover:bg-[#25D366]/5'
-                    }`}
-                  >
+                      sent ? 'border-success bg-success-light text-success-text'
+                           : 'border-[#25D366] text-[#25D366] hover:bg-[#25D366]/5'
+                    }`}>
                     {sent ? <><CheckCircle className="w-4 h-4" /> Bill Sent! ✓</> : <><MessageSquare className="w-4 h-4" /> Send Digital Bill</>}
                   </button>
                 </div>
@@ -231,7 +385,7 @@ export default function BillingPage() {
             </div>
           </div>
 
-          {/* Right sidebar */}
+          {/* Right sidebar – Recent Bills */}
           <div className="space-y-4">
             <div className="card p-4">
               <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
@@ -256,6 +410,8 @@ export default function BillingPage() {
           </div>
         </div>
       </div>
+
+      {showAddModal && <AddItemModal onAdd={addItem} onClose={() => setShowAddModal(false)} />}
     </>
   )
 }
