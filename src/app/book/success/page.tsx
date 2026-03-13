@@ -1,8 +1,44 @@
+'use client'
+
 import Link from 'next/link'
-import { CheckCircle, Calendar, RotateCcw, Download, MessageCircle, Mail } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { CheckCircle, Calendar, Download, MessageCircle } from 'lucide-react'
+
+function to12h(t: string): string {
+  if (!t) return t
+  if (t.includes('AM') || t.includes('PM')) return t
+  const [h, m] = t.split(':').map(Number)
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const hour = h % 12 || 12
+  return `${hour}:${String(m).padStart(2, '0')} ${ampm}`
+}
 
 export default function BookingSuccessPage() {
-  const appointmentId = '#MED-20260318-007'
+  const [appointment, setAppointment] = useState<any>(null)
+  const [dateStr, setDateStr] = useState('')
+  const [slotStr, setSlotStr] = useState('')
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem('md_appointment')
+    if (raw) setAppointment(JSON.parse(raw))
+    setDateStr(sessionStorage.getItem('md_date') ?? '')
+    setSlotStr(sessionStorage.getItem('md_slot') ?? '')
+    // Clean up after read
+    sessionStorage.removeItem('md_slot')
+    sessionStorage.removeItem('md_date')
+  }, [])
+
+  const appointmentId = appointment?.id
+    ? `#MED-${String(appointment.id).slice(0, 12).toUpperCase()}`
+    : '#MED-CONFIRMED'
+
+  const displayDate = dateStr ? new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  }) : 'your appointment date'
+
+  const displayShortDate = dateStr ? new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
+    month: 'long', day: 'numeric', year: 'numeric'
+  }) : ''
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-brand-bg flex items-center justify-center py-10 px-4">
@@ -13,7 +49,7 @@ export default function BookingSuccessPage() {
             <CheckCircle className="w-9 h-9 text-success" />
           </div>
           <h1 className="text-2xl font-extrabold text-text-primary">Appointment Confirmed! 🎉</h1>
-          <p className="text-text-secondary mt-2">You're all set! We'll see you on <strong>Wednesday, March 18</strong>.</p>
+          <p className="text-text-secondary mt-2">You're all set! We'll see you on <strong>{displayDate}</strong>.</p>
         </div>
 
         {/* Ticket card */}
@@ -39,9 +75,9 @@ export default function BookingSuccessPage() {
           <div className="px-6 py-5 grid grid-cols-2 gap-4">
             {[
               { label: 'Doctor', value: 'Dr. Ananya Sharma' },
-              { label: 'Date', value: 'March 18, 2026' },
-              { label: 'Time', value: '10:30 AM' },
-              { label: 'Payment', value: 'Paid ₹500 · UPI' },
+              { label: 'Date', value: displayShortDate || '—' },
+              { label: 'Time', value: to12h(slotStr) || '—' },
+              { label: 'Payment', value: appointment?.paymentMethod === 'UPI' ? 'Paid · UPI' : 'Pay at Clinic' },
             ].map(({ label, value }) => (
               <div key={label}>
                 <p className="text-xs text-text-muted font-medium uppercase tracking-widest mb-0.5">{label}</p>
@@ -52,26 +88,21 @@ export default function BookingSuccessPage() {
         </div>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-3 gap-3 mb-5">
-          {[
-            { icon: Calendar, label: 'Add to Calendar' },
-            { icon: RotateCcw, label: 'Reschedule' },
-            { icon: Download, label: 'Download PDF' },
-          ].map(({ icon: Icon, label }) => (
-            <button key={label} className="flex flex-col items-center gap-1.5 py-3 border border-brand-border rounded-xl hover:border-primary hover:bg-primary-light transition-all text-sm text-text-secondary hover:text-primary">
-              <Icon className="w-4 h-4" />
-              <span className="text-xs font-medium">{label}</span>
-            </button>
-          ))}
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <button className="flex flex-col items-center gap-1.5 py-3 border border-brand-border rounded-xl hover:border-primary hover:bg-primary-light transition-all text-sm text-text-secondary hover:text-primary">
+            <Calendar className="w-4 h-4" />
+            <span className="text-xs font-medium">Add to Calendar</span>
+          </button>
+          <button className="flex flex-col items-center gap-1.5 py-3 border border-brand-border rounded-xl hover:border-primary hover:bg-primary-light transition-all text-sm text-text-secondary hover:text-primary">
+            <Download className="w-4 h-4" />
+            <span className="text-xs font-medium">Download PDF</span>
+          </button>
         </div>
 
         {/* Confirmation notice */}
         <div className="flex items-center justify-center gap-4 text-sm text-text-muted mb-5">
           <span className="flex items-center gap-1.5">
-            <MessageCircle className="w-4 h-4 text-success" /> WhatsApp sent
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Mail className="w-4 h-4 text-primary" /> Email sent
+            <MessageCircle className="w-4 h-4 text-success" /> WhatsApp confirmation sent
           </span>
         </div>
 

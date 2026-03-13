@@ -1,28 +1,80 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calendar, Clock, User, IndianRupee, ArrowRight, ArrowLeft, Stethoscope, Hash, Info } from 'lucide-react'
+import { Calendar, Clock, User, IndianRupee, ArrowRight, ArrowLeft, Stethoscope, Hash, Info, AlertCircle, Loader2 } from 'lucide-react'
 import StepProgressBar from '@/components/booking/StepProgressBar'
 import Link from 'next/link'
+import { bookingApi, analyticsApi } from '@/lib/api'
+
+function to12h(t: string): string {
+  if (!t) return t
+  if (t.includes('AM') || t.includes('PM')) return t
+  const [h, m] = t.split(':').map(Number)
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const hour = h % 12 || 12
+  return `${hour}:${String(m).padStart(2, '0')} ${ampm}`
+}
 
 export default function ConfirmPage() {
   const router = useRouter()
-  const [payMode, setPayMode] = useState<'upi' | 'clinic'>('upi')
+  const [payMode, setPayMode] = useState<'upi' | 'clinic'>('clinic')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [consultationFee, setConsultationFee] = useState(500)
 
-  const handleConfirm = () => {
+  // Read sessionStorage
+  const patientRaw = typeof window !== 'undefined' ? sessionStorage.getItem('md_patient') : null
+  const patient = patientRaw ? JSON.parse(patientRaw) : null
+  const dateStr: string = typeof window !== 'undefined' ? sessionStorage.getItem('md_date') ?? '' : ''
+  const slotStr: string = typeof window !== 'undefined' ? sessionStorage.getItem('md_slot') ?? '' : ''
+
+  const displayDate = dateStr ? new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  }) : '—'
+
+  // Get settings to show actual fee
+  useEffect(() => {
+    analyticsApi.today().then((res: any) => {
+      if (res?.data?.settings?.consultationFee) {
+        setConsultationFee(Number(res.data.settings.consultationFee))
+      }
+    }).catch(() => {})
+  }, [])
+
+  if (!dateStr || !slotStr) {
+    router.replace('/book/select-date')
+    return null
+  }
+
+  const handleConfirm = async () => {
     setLoading(true)
-    setTimeout(() => router.push('/book/success'), 1000)
+    setError('')
+    try {
+      const res = await bookingApi.createAppointment({
+        date: dateStr,
+        timeSlot: slotStr,
+        symptoms: patient?.symptoms,
+        paymentMethod: payMode === 'upi' ? 'UPI' : 'AT_CLINIC',
+      })
+      if (res.success && res.data) {
+        // Store appointment id for success page
+        sessionStorage.setItem('md_appointment', JSON.stringify(res.data))
+        router.push('/book/success')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Booking failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const rows = [
     { icon: Stethoscope, label: 'Doctor', value: 'Dr. Ananya Sharma' },
-    { icon: User, label: 'Patient', value: 'Rahul Mehta' },
-    { icon: Calendar, label: 'Date', value: 'Wednesday, March 18, 2026' },
-    { icon: Clock, label: 'Time', value: '10:30 AM' },
-    { icon: Hash, label: 'Queue', value: '#7 in queue today' },
-    { icon: IndianRupee, label: 'Fee', value: '₹500' },
+    { icon: User, label: 'Patient', value: patient?.name ?? '—' },
+    { icon: Calendar, label: 'Date', value: displayDate },
+    { icon: Clock, label: 'Time', value: to12h(slotStr) },
+    { icon: IndianRupee, label: 'Consultation Fee', value: `₹${consultationFee}` },
   ]
 
   return (
@@ -31,7 +83,7 @@ export default function ConfirmPage() {
 
       <div className="card p-6 shadow-md">
         <h1 className="text-xl font-bold text-text-primary mb-1">Review Your Appointment</h1>
-        <p className="text-sm text-text-secondary mb-6">Confirm the details before proceeding to payment.</p>
+        <p className="text-sm text-text-secondary mb-6">Confirm the details before booking.</p>
 
         {/* Summary rows */}
         <div className="space-y-3 mb-6">
@@ -74,6 +126,12 @@ export default function ConfirmPage() {
           <p className="text-xs text-text-secondary">Free cancellation up to 2 hours before your appointment.</p>
         </div>
 
+        {error && (
+          <div className="flex items-center gap-2 text-sm text-danger bg-danger/5 border border-danger/20 rounded-lg px-3 py-2 mb-4">
+            <AlertCircle className="w-4 h-4 shrink-0" /> {error}
+          </div>
+        )}
+
         {/* Actions */}
         <button
           onClick={handleConfirm}
@@ -81,9 +139,9 @@ export default function ConfirmPage() {
           className="w-full flex items-center justify-center gap-2 btn-primary py-3 mb-3"
         >
           {loading ? (
-            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <><Loader2 className="w-4 h-4 animate-spin" /> Booking…</>
           ) : (
-            <>{payMode === 'upi' ? 'Confirm & Pay ₹500' : 'Confirm Booking'} <ArrowRight className="w-4 h-4" /></>
+            <>{payMode === 'upi' ? `Confirm & Pay ₹${consultationFee}` : 'Confirm Booking'} <ArrowRight className="w-4 h-4" /></>
           )}
         </button>
 
