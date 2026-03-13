@@ -3,6 +3,7 @@
 interface Item {
   id: string
   name: string
+  description?: string
   qty: number
   price: number
 }
@@ -92,7 +93,10 @@ export default function PrintableInvoice({
           {items.map((item, i) => (
             <tr key={item.id} style={{ borderBottom: '1px solid #F1F5F9', background: i % 2 === 0 ? '#FAFBFC' : '#fff' }}>
               <td style={{ padding: '10px 14px', color: '#94A3B8', fontSize: 12 }}>{i + 1}</td>
-              <td style={{ padding: '10px 14px', fontWeight: 500, color: '#0F172A', fontSize: 13 }}>{item.name}</td>
+              <td style={{ padding: '10px 14px', fontWeight: 500, color: '#0F172A', fontSize: 13 }}>
+                {item.name}
+                {item.description && <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>{item.description}</div>}
+              </td>
               <td style={{ padding: '10px 14px', textAlign: 'center', color: '#64748B', fontSize: 13 }}>{item.qty}</td>
               <td style={{ padding: '10px 14px', textAlign: 'right', color: '#64748B', fontSize: 13 }}>₹{item.price.toLocaleString()}</td>
               <td style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 600, color: '#0F172A', fontSize: 13 }}>₹{(item.price * item.qty).toLocaleString()}</td>
