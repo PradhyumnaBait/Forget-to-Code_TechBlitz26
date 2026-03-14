@@ -10,6 +10,7 @@ import analyticsRoutes from './analyticsRoutes';
 import aiRoutes from './aiRoutes';
 import whatsappRoutes from './whatsappRoutes';
 import patientRoutes from './patientRoutes';
+import settingsRoutes from './settingsRoutes';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/analytics', analyticsRoutes);
 router.use('/ai', aiRoutes);
 router.use('/whatsapp', whatsappRoutes);
 router.use('/patients', patientRoutes);
+router.use('/settings', settingsRoutes);
 
 export default router;

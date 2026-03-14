@@ -183,23 +183,92 @@ model OTP {
 
 // ==================== Clinic Settings ====================
 model ClinicSettings {
-  id   String @id @default(cuid())
-
-  clinicName       String  @db.VarChar(255)
-  phone            String  @db.VarChar(20)
-  email            String? @db.VarChar(255)
-  address          String? @db.Text
-
-  workingHourStart String  @default("09:00")
-  workingHourEnd   String  @default("18:00")
-  slotDuration     Int     @default(30)
-  consultationFee  Decimal @default(500) @db.Decimal(10, 2)
-
-  // Working days: Mon=1 ... Sun=7
-  workingDays      String  @default("1,2,3,4,5,6")
+  id              String  @id @default(cuid())
+  clinicName      String  @default("MedDesk Clinic") @db.VarChar(255)
+  address         String? @db.Text
+  phone           String? @db.VarChar(20)
+  email           String? @db.VarChar(255)
+  consultationFee Decimal @default(500) @db.Decimal(10, 2)
+  locationLink    String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("clinic_settings")
+}
+
+// ==================== Doctor Schedule ====================
+model DoctorSchedule {
+  id                  String   @id @default(cuid())
+  workingDays         String[] @default(["monday", "tuesday", "wednesday", "thursday", "friday"])
+  startTime           String   @default("09:00")
+  endTime             String   @default("18:00")
+  breakStartTime      String   @default("13:00")
+  breakEndTime        String   @default("14:00")
+  appointmentDuration Int      @default(30) // minutes
+  bufferTime          Int      @default(5)  // minutes between appointments
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("doctor_schedule")
+}
+
+// ==================== Appointment Rules ====================
+model AppointmentRules {
+  id                    String @id @default(cuid())
+  maxAppointmentsPerDay Int    @default(40)
+  allowWalkIns          Boolean @default(true)
+  cancellationTimeLimit Int    @default(2) // hours before appointment
+  rescheduleLimit       Int    @default(3) // max reschedules allowed
+  advanceBookingDays    Int    @default(30) // how many days in advance
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("appointment_rules")
+}
+
+// ==================== Notification Settings ====================
+model NotificationSettings {
+  id                  String  @id @default(cuid())
+  whatsappEnabled     Boolean @default(false)
+  smsEnabled          Boolean @default(true)
+  emailEnabled        Boolean @default(true)
+  reminderTime        Int     @default(24) // hours before appointment
+  confirmationEnabled Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+// ==================== Billing Settings ====================
+model BillingSettings {
+  id                     String   @id @default(cuid())
+  defaultConsultationFee Decimal  @default(500) @db.Decimal(10, 2)
+  taxPercentage          Decimal  @default(18) @db.Decimal(5, 2)
+  currency               String   @default("INR") @db.VarChar(10)
+  paymentMethods         String[] @default(["cash", "upi", "card"])
+  autoGenerateInvoice    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("billing_settings")
+}
+
+// ==================== System Settings ====================
+model SystemSettings {
+  id           String  @id @default(cuid())
+  settingKey   String  @unique @db.VarChar(255)
+  settingValue String? @db.Text
+  settingType  String  @default("string") @db.VarChar(50) // string, number, boolean, json
+  description  String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
 }

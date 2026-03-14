@@ -1,9 +1,11 @@
 import prisma from '../config/database';
 import { AppointmentStatus } from '../types';
 
-// Doctor works Mon–Sat by default (1=Mon...6=Sat)
-const DEFAULT_WORKING_DAYS = [1, 2, 3, 4, 5, 6];
-const SLOT_DURATION_MINUTES = 30;
+// Fallbacks if schedule settings are missing
+const FALLBACK_WORKING_DAYS = [1, 2, 3, 4, 5, 6]; // Mon–Sat
+const FALLBACK_START_TIME = '09:00';
+const FALLBACK_END_TIME = '18:00';
+const FALLBACK_SLOT_DURATION_MINUTES = 30;
 
 function timeToMinutes(t: string): number {
   const [h, m] = t.split(':').map(Number);
@@ -35,10 +37,8 @@ export function generateTimeSlots(
 
 export class SlotService {
   async getAvailableDates(daysAhead = 14): Promise<string[]> {
-    const settings = await this.getClinicSettings();
-    const workingDays = settings.workingDays
-      .split(',')
-      .map(Number);
+    const settings = await this.getScheduleSettings();
+    const workingDays = settings.workingDays;
 
     const dates: string[] = [];
     const today = new Date();
@@ -61,7 +61,7 @@ export class SlotService {
   }
 
   async getAvailableSlots(dateStr: string): Promise<string[]> {
-    const settings = await this.getClinicSettings();
+    const settings = await this.getScheduleSettings();
     const allSlots = generateTimeSlots(
       settings.workingHourStart,
       settings.workingHourEnd,
@@ -146,23 +146,38 @@ export class SlotService {
     return result.count;
   }
 
-  private async getClinicSettings() {
-    let settings = await prisma.clinicSettings.findFirst();
-    if (!settings) {
-      // Create defaults
-      settings = await prisma.clinicSettings.create({
-        data: {
-          clinicName: 'MedDesk Clinic',
-          phone: '+91000000000',
-          workingHourStart: '09:00',
-          workingHourEnd: '18:00',
-          slotDuration: SLOT_DURATION_MINUTES,
-          consultationFee: 500,
-          workingDays: '1,2,3,4,5,6',
-        },
+  private async getScheduleSettings() {
+    // Fetch doctor schedule; fall back to defaults if not configured
+    let schedule = await prisma.doctorSchedule.findFirst();
+    if (!schedule) {
+      schedule = await prisma.doctorSchedule.create({
+        data: {},
       });
     }
-    return settings;
+
+    const dayMap: Record<string, number> = {
+      monday: 1,
+      tuesday: 2,
+      wednesday: 3,
+      thursday: 4,
+      friday: 5,
+      saturday: 6,
+      sunday: 7,
+    };
+
+    const workingDays =
+      schedule.workingDays && schedule.workingDays.length > 0
+        ? schedule.workingDays
+            .map((d) => dayMap[d.toLowerCase()] ?? 0)
+            .filter((n) => n > 0)
+        : FALLBACK_WORKING_DAYS;
+
+    return {
+      workingDays,
+      workingHourStart: schedule.startTime || FALLBACK_START_TIME,
+      workingHourEnd: schedule.endTime || FALLBACK_END_TIME,
+      slotDuration: schedule.appointmentDuration || FALLBACK_SLOT_DURATION_MINUTES,
+    };
   }
 }
 

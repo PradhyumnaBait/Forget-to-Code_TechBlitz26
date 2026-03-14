@@ -322,3 +322,64 @@ export const whatsappApi = {
       body: JSON.stringify({ phone, message }),
     }),
 };
+
+// ─── Settings ─────────────────────────────────────────────────────────────
+export const settingsApi = {
+  // Get all settings
+  getAll: () =>
+    request<{ success: boolean; data: any }>('/settings'),
+
+  // Clinic Settings
+  getClinic: () =>
+    request<{ success: boolean; data: any }>('/settings/clinic'),
+  updateClinic: (data: any) =>
+    request<{ success: boolean; data: any }>('/settings/clinic', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Doctor Schedule
+  getSchedule: () =>
+    request<{ success: boolean; data: any }>('/settings/schedule'),
+  updateSchedule: (data: any) =>
+    request<{ success: boolean; data: any }>('/settings/schedule', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Appointment Rules
+  getRules: () =>
+    request<{ success: boolean; data: any }>('/settings/rules'),
+  updateRules: (data: any) =>
+    request<{ success: boolean; data: any }>('/settings/rules', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Notification Settings
+  getNotifications: () =>
+    request<{ success: boolean; data: any }>('/settings/notifications'),
+  updateNotifications: (data: any) =>
+    request<{ success: boolean; data: any }>('/settings/notifications', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Billing Settings
+  getBilling: () =>
+    request<{ success: boolean; data: any }>('/settings/billing'),
+  updateBilling: (data: any) =>
+    request<{ success: boolean; data: any }>('/settings/billing', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // System Settings
+  getSystem: () =>
+    request<{ success: boolean; data: any }>('/settings/system'),
+  updateSystem: (settings: any) =>
+    request<{ success: boolean }>('/settings/system', {
+      method: 'PUT',
+      body: JSON.stringify({ settings }),
+    }),
+};

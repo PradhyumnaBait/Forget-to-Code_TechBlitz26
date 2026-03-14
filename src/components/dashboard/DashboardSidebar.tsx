@@ -77,9 +77,9 @@ export default function DashboardSidebar({ role = 'reception' }: { role?: string
 
       {/* Bottom */}
       <div className="px-3 py-4 border-t border-brand-border space-y-0.5">
-        <button className="sidebar-item w-full">
+        <Link href="/settings" className="sidebar-item w-full">
           <Settings className="w-4 h-4" /> Settings
-        </button>
+        </Link>
         <Link href="/" className="sidebar-item w-full text-danger hover:text-danger hover:bg-danger-light">
           <LogOut className="w-4 h-4" /> Logout
         </Link>
