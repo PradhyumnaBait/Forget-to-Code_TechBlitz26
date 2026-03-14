@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   FileText, IndianRupee, Plus, Printer, CheckCircle, Smartphone,
-  Trash2, MessageSquare, Search, X, Loader2, Save, Percent
+  Trash2, MessageSquare, Search, X, Loader2, Save, Percent, Clock, Users, RefreshCw
 } from 'lucide-react'
 import PrintableInvoice from '@/components/billing/PrintableInvoice'
-import { patientApi } from '@/lib/api'
+import { patientApi, appointmentApi } from '@/lib/api'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Item {
@@ -149,6 +149,99 @@ function PatientSearch({ onSelect }: { onSelect: (p: PatientInfo) => void }) {
   )
 }
 
+interface PendingBillItem { appointmentId: string; patientName: string; patientPhone: string; patientId: string; timeSlot: string; consultation?: any; prescriptions?: any[] }
+
+function PendingBillingQueue({ onSelect }: { onSelect: (item: PendingBillItem) => void }) {
+  const [pending, setPending] = useState<PendingBillItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      // Fetch today's COMPLETED appointments that do NOT yet have a billing record
+      const res = await appointmentApi.list({ status: 'COMPLETED' })
+      const apts = ((res.data as any)?.appointments ?? []) as any[]
+      const items: PendingBillItem[] = apts
+        .filter(a => !a.billing) // no billing yet
+        .map(a => ({
+          appointmentId: a.id,
+          patientName: a.patient?.name ?? 'Unknown',
+          patientPhone: a.patient?.phone ?? '',
+          patientId: a.patient?.id ?? '',
+          timeSlot: a.timeSlot,
+          consultation: a.consultation,
+          prescriptions: a.consultation?.prescriptions,
+        }))
+      setPending(items)
+    } catch {
+      setPending([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  return (
+    <div className="card border border-brand-border bg-white flex flex-col" style={{ maxHeight: '80vh' }}>
+      <div className="p-4 border-b border-brand-border bg-gradient-to-r from-brand-bg to-white flex items-center justify-between">
+        <h3 className="text-sm font-extrabold text-text-primary flex items-center gap-2">
+          <Users className="w-4 h-4 text-success" />
+          Pending Billing
+        </h3>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${pending.length > 0 ? 'bg-danger text-white' : 'bg-brand-bg text-text-muted'}`}>{pending.length}</span>
+          <button onClick={load} className="p-1 rounded-lg hover:bg-brand-bg text-text-muted hover:text-primary">
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+      
+      {loading ? (
+        <div className="p-6 text-center text-text-muted">
+          <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto mb-2" />
+          <p className="text-xs font-medium">Loading completed appointments…</p>
+        </div>
+      ) : pending.length === 0 ? (
+        <div className="p-6 text-center text-text-muted flex flex-col items-center gap-2">
+          <CheckCircle className="w-8 h-8 text-success/30" />
+          <p className="text-xs font-medium">All patients billed!</p>
+          <p className="text-[10px] text-text-muted/60">Patients will appear here after consultation completes.</p>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto divide-y divide-brand-border">
+          {pending.map((item) => (
+            <button key={item.appointmentId} onClick={() => onSelect(item)}
+              className="w-full text-left px-4 py-3.5 hover:bg-primary-light hover:border-l-4 hover:border-l-primary transition-all group">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-success-light text-success-text flex items-center justify-center text-xs font-bold shrink-0">
+                    {item.patientName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-text-primary group-hover:text-primary">{item.patientName}</p>
+                    <p className="text-xs text-text-muted mt-0.5">{item.patientPhone}</p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-[10px] font-bold bg-success-light text-success-text px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Clock className="w-2.5 h-2.5" />{item.timeSlot}
+                  </span>
+                </div>
+              </div>
+              {item.prescriptions && item.prescriptions.length > 0 && (
+                <p className="text-[10px] text-text-muted mt-2 pl-11">
+                  {item.prescriptions.length} prescription(s) to bill
+                </p>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Main Billing Page ────────────────────────────────────────────────────────
 const DEFAULT_ITEMS: Item[] = [
   { id: '1', name: 'Dr. Ananya Sharma — General Consultation', description: 'General OPD visit', qty: 1, price: 500 },
@@ -167,6 +260,7 @@ export default function BillingPage() {
   const [items, setItems] = useState<Item[]>(DEFAULT_ITEMS)
   const [discountPct, setDiscountPct] = useState(0)   // percentage discount
   const [payMode, setPayMode] = useState<'upi' | 'cash'>('upi')
+
   const [received, setReceived] = useState('700')
   const [sent, setSent] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -192,6 +286,22 @@ export default function BillingPage() {
 
   const handlePrint = () => window.print()
   const handleSendDigital = () => { setSent(true); setTimeout(() => setSent(false), 3000) }
+
+  // Auto-load patient + billing items from a completed appointment
+  const handlePendingSelect = (sel: PendingBillItem) => {
+    setPatient({ id: sel.patientId, name: sel.patientName, phone: sel.patientPhone })
+    const consultationFee: Item = { id: '__consult', name: 'Dr. Consultation Fee', description: sel.consultation?.diagnosis ?? 'General OPD visit', qty: 1, price: 500 }
+    const prescItems: Item[] = (sel.prescriptions ?? []).map((p: any, i: number) => ({
+      id: `__rx_${i}`,
+      name: `${p.medicine}${p.dose ? ` — ${p.dose}` : ''}`,
+      description: p.notes || `${p.duration ?? ''} days`,
+      qty: p.duration ?? 1,
+      price: 20, // default price per prescription item
+    }))
+    setItems([consultationFee, ...prescItems])
+    setDiscountPct(0)
+    setPayMode('upi')
+  }
 
   const invoiceId = `#MED-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${String(Math.floor(Math.random()*900+100))}`
   const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -234,9 +344,15 @@ export default function BillingPage() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid xl:grid-cols-5 lg:grid-cols-4 gap-6">
+          {/* Pending Billing Queue */}
+          <div className="xl:col-span-1 lg:col-span-1">
+            <PendingBillingQueue onSelect={handlePendingSelect} />
+          </div>
+
           {/* Main form */}
-          <div className="lg:col-span-3 space-y-5">
+          <div className="xl:col-span-3 lg:col-span-3 space-y-5">
+
             {/* Bill items */}
             <div className="card shadow-sm overflow-hidden">
               {/* Column headers */}

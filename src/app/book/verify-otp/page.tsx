@@ -25,20 +25,26 @@ export default function VerifyOtpPage() {
   const phone: string = patient?.phone ?? ''
   const displayPhone = phone.replace('+91', '')
 
-  // Fetch the actual OTP from backend for demo purposes
+  // Fetch the actual OTP from backend for demo purposes (development only)
   useEffect(() => {
     const fetchCurrentOtp = async () => {
       if (!phone) return
       
-      try {
-        const response = await authApi.getCurrentOtp(phone)
-        if (response.success && response.data?.otp) {
-          setDemoOtp(response.data.otp)
+      // Only fetch demo OTP in development mode
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          const response = await authApi.getCurrentOtp(phone)
+          if (response.success && response.data?.otp) {
+            setDemoOtp(response.data.otp)
+          }
+        } catch (error) {
+          // If we can't fetch the OTP, fall back to a demo OTP
+          console.log('Could not fetch current OTP, using demo OTP')
+          setDemoOtp('123456')
         }
-      } catch (error) {
-        // If we can't fetch the OTP, fall back to a demo OTP
-        console.log('Could not fetch current OTP, using demo OTP')
-        setDemoOtp('123456')
+      } else {
+        // In production, don't show any demo OTP
+        setDemoOtp('')
       }
     }
 
@@ -186,42 +192,44 @@ export default function VerifyOtpPage() {
           <p className="text-xs text-text-muted mt-1">OTP expires in 5 minutes</p>
         </div>
 
-        {/* Demo OTP Display for Testing */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <Terminal className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-semibold text-blue-800">Demo OTP for Testing</span>
-          </div>
-          <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-blue-100">
-            <div className="flex items-center gap-3">
-              <code className="text-2xl font-mono font-bold text-blue-900 bg-blue-50 px-4 py-2 rounded-md">
-                {demoOtp}
-              </code>
-              <div className="text-xs text-blue-600">
-                <div>📱 [DEV MODE] OTP for {phone}</div>
-                <div className="font-medium text-green-600">✅ Use this OTP to continue</div>
+        {/* Demo OTP Display for Testing - Only in Development */}
+        {process.env.NODE_ENV === 'development' && demoOtp && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Terminal className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-semibold text-blue-800">Demo OTP for Testing</span>
+            </div>
+            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-blue-100">
+              <div className="flex items-center gap-3">
+                <code className="text-2xl font-mono font-bold text-blue-900 bg-blue-50 px-4 py-2 rounded-md">
+                  {demoOtp}
+                </code>
+                <div className="text-xs text-blue-600">
+                  <div>📱 [DEV MODE] OTP for {phone}</div>
+                  <div className="font-medium text-green-600">✅ Use this OTP to continue</div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={copyOtp}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors"
+                >
+                  {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copied ? 'Copied!' : 'Copy'}
+                </button>
+                <button
+                  onClick={useDemoOtp}
+                  className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                >
+                  Use OTP
+                </button>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={copyOtp}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors"
-              >
-                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-              <button
-                onClick={useDemoOtp}
-                className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-              >
-                Use OTP
-              </button>
-            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              💡 This is the actual OTP generated by the backend. In production, it would be sent via SMS.
+            </p>
           </div>
-          <p className="text-xs text-blue-600 mt-2">
-            💡 This is the actual OTP generated by the backend. In production, it would be sent via SMS.
-          </p>
-        </div>
+        )}
 
         {/* OTP inputs */}
         <div className="flex gap-2.5 justify-center mb-5">

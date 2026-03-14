@@ -9,20 +9,22 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/60 via-white to-indigo-50/40 pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        {/* Demo Mode Banner */}
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 mb-8">
-          <div className="flex items-center gap-3">
-            <TestTube className="w-5 h-5 text-amber-600" />
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-amber-800">🚀 Demo Mode - Test All Features</h3>
-              <p className="text-xs text-amber-700 mt-1">
-                This is a fully functional demo. OTPs and login credentials are displayed for easy testing. 
-                <Link href="/login" className="font-medium underline ml-1">Staff Login</Link> | 
-                <span className="font-medium ml-1">Patient OTP: Auto-generated</span>
-              </p>
+        {/* Demo Mode Banner - Only in Development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 mb-8">
+            <div className="flex items-center gap-3">
+              <TestTube className="w-5 h-5 text-amber-600" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-amber-800">🚀 Demo Mode - Test All Features</h3>
+                <p className="text-xs text-amber-700 mt-1">
+                  This is a fully functional demo. OTPs and login credentials are displayed for easy testing. 
+                  <Link href="/login" className="font-medium underline ml-1">Staff Login</Link> | 
+                  <span className="font-medium ml-1">Patient OTP: Auto-generated</span>
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left — Copy */}
