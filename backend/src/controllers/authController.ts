@@ -11,6 +11,8 @@ const sendOtpSchema = z.object({
 const verifyOtpSchema = z.object({
   phone: z.string().min(10).max(15),
   otp: z.string().length(6),
+  name: z.string().min(1).optional(),
+  age: z.number().int().min(1).max(120).optional(),
 });
 
 export const sendOTP = async (
@@ -39,8 +41,8 @@ export const verifyOTP = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { phone, otp } = verifyOtpSchema.parse(req.body);
-    const result = await otpService.verifyOTP(phone, otp);
+    const body = verifyOtpSchema.parse(req.body);
+    const result = await otpService.verifyOTP(body.phone, body.otp, body.name, body.age);
 
     if (!result.success) {
       res.status(400).json(errorResponse(result.message));

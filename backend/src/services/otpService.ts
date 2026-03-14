@@ -43,7 +43,9 @@ export class OTPService {
 
   async verifyOTP(
     phone: string,
-    code: string
+    code: string,
+    name?: string,
+    age?: number
   ): Promise<{ success: boolean; message: string; token?: string; patientId?: string }> {
     const record = await prisma.oTP.findUnique({ where: { phone } });
 
@@ -72,11 +74,16 @@ export class OTPService {
     // Valid — delete OTP
     await prisma.oTP.delete({ where: { phone } });
 
-    // Upsert patient
+    // Upsert patient — use provided name if given, else keep existing or default
+    const realName = name && name.trim().length > 0 ? name.trim() : undefined;
     const patient = await prisma.patient.upsert({
       where: { phone },
-      update: {},
-      create: { phone, name: 'New Patient' },
+      update: {
+        // Only update name if we have a real one (not 'New Patient')
+        ...(realName ? { name: realName } : {}),
+        ...(age ? { age } : {}),
+      },
+      create: { phone, name: realName ?? 'New Patient', age },
     });
 
     const token = jwt.sign({ userId: patient.id }, env.JWT_SECRET, {
