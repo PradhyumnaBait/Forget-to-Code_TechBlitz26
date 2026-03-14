@@ -9,7 +9,8 @@ import { Lock, Mail, LogIn, ArrowLeft } from 'lucide-react'
 export default function AdminLoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect') || '/settings'
+  const redirectParam = searchParams.get('redirect')
+  const redirectTo = redirectParam ? decodeURIComponent(redirectParam) : '/settings'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -27,7 +28,7 @@ export default function AdminLoginPage() {
           localStorage.setItem('md_token', res.data.token)
         }
         // Force a page turn instead of client-side routing to guarantee fresh context loading for Settings Layout
-        window.location.href = redirectTo
+        window.location.href = redirectTo || '/settings'
       } else {
         setError('Invalid admin credentials')
       }
