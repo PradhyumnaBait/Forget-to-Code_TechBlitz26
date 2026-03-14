@@ -3,9 +3,10 @@ import { Calendar, Shield, Clock, ArrowRight, CheckCircle } from 'lucide-react'
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-white overflow-hidden">
-      {/* Subtle gradient accent */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-light via-white to-accent-light opacity-60 pointer-events-none" />
+    <section className="relative overflow-hidden">
+      {/* Premium gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-white pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/60 via-white to-indigo-50/40 pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -17,9 +18,9 @@ export default function HeroSection() {
               Trusted by 2,000+ patients
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-extrabold text-text-primary leading-tight mb-5">
+            <h1 className="text-4xl lg:text-5xl font-extrabold text-text-primary leading-tight tracking-tight mb-5">
               Your Health,{' '}
-              <span className="text-primary">Our Priority</span>
+              <span className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">Our Priority</span>
             </h1>
 
             <p className="text-lg text-text-secondary leading-relaxed mb-8 max-w-lg">
@@ -63,7 +64,7 @@ export default function HeroSection() {
           {/* Right — Illustration card */}
           <div className="hidden lg:flex flex-col gap-4">
             {/* Doctor card */}
-            <div className="card p-6 flex items-center gap-4 shadow-md">
+            <div className="card p-6 flex items-center gap-4 shadow-xl border-gray-200 hover:-translate-y-[2px] transition-all duration-200 ease-out">
               <div className="w-16 h-16 bg-primary-light rounded-2xl flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 64 64" className="w-10 h-10" fill="none">
                   <circle cx="32" cy="20" r="12" fill="#3B82F6" opacity="0.15" />
@@ -94,7 +95,7 @@ export default function HeroSection() {
                 { label: 'Slots Available', value: '12', color: 'text-success', bg: 'bg-success-light' },
                 { label: 'Avg Wait Time', value: '8 min', color: 'text-warning', bg: 'bg-warning-light' },
               ].map(({ label, value, color, bg }) => (
-                <div key={label} className="card p-4 text-center">
+                <div key={label} className="card-hover p-4 text-center">
                   <div className={`text-2xl font-bold ${color} mb-1`}>{value}</div>
                   <div className="text-xs text-text-muted leading-tight">{label}</div>
                 </div>

@@ -41,14 +41,14 @@ const features = [
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="py-16 lg:py-20 bg-brand-bg">
+    <section id="features" className="py-16 lg:py-20 bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center mb-12">
           <span className="inline-block text-xs font-semibold text-primary uppercase tracking-widest mb-3">
             Why MedDesk
           </span>
-          <h2 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4">
+          <h2 className="text-3xl lg:text-4xl font-bold text-text-primary tracking-tight mb-4">
             Everything you need for a seamless clinic visit
           </h2>
           <p className="text-text-secondary max-w-xl mx-auto text-base">
@@ -61,12 +61,12 @@ export default function FeaturesSection() {
           {features.map(({ icon: Icon, title, description, color }) => (
             <div
               key={title}
-              className="card p-6 hover:shadow-md transition-shadow duration-200 group"
+              className="card p-6 hover:shadow-lg hover:-translate-y-[3px] transition-all duration-200 ease-out group cursor-default"
             >
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${color}`}>
-                <Icon className="w-5 h-5" />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 p-3 ${color}`}>
+                <Icon className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-semibold text-text-primary mb-2 group-hover:text-primary transition-colors">
+              <h3 className="text-base font-semibold text-text-primary mb-2 group-hover:text-blue-600 transition-colors duration-200">
                 {title}
               </h3>
               <p className="text-sm text-text-secondary leading-relaxed">
