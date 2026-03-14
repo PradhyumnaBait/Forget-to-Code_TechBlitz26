@@ -34,6 +34,8 @@ export default function NotificationSettingsPage() {
         }
       } catch (error) {
         console.error('Failed to fetch notification settings:', error)
+        setMessage('Failed to load notification settings. Please refresh the page.')
+        setTimeout(() => setMessage(''), 3000)
       } finally {
         setLoading(false)
       }

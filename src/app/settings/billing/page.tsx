@@ -35,10 +35,17 @@ export default function BillingSettingsPage() {
       try {
         const response = await settingsApi.getBilling()
         if (response.success && response.data) {
-          setSettings(response.data)
+          // Ensure defaultConsultationFee is a number
+          const data = {
+            ...response.data,
+            defaultConsultationFee: Number(response.data.defaultConsultationFee) || 500
+          }
+          setSettings(data)
         }
       } catch (error) {
         console.error('Failed to fetch billing settings:', error)
+        setMessage('Failed to load billing settings. Please refresh the page.')
+        setTimeout(() => setMessage(''), 3000)
       } finally {
         setLoading(false)
       }
@@ -80,7 +87,7 @@ export default function BillingSettingsPage() {
 
   // Calculate sample bill
   const calculateSampleBill = () => {
-    const fee = settings.defaultConsultationFee
+    const fee = Number(settings.defaultConsultationFee) || 0
     const total = fee
     return { fee, total }
   }

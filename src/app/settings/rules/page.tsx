@@ -34,6 +34,8 @@ export default function AppointmentRulesPage() {
         }
       } catch (error) {
         console.error('Failed to fetch appointment rules:', error)
+        setMessage('Failed to load appointment rules. Please refresh the page.')
+        setTimeout(() => setMessage(''), 3000)
       } finally {
         setLoading(false)
       }

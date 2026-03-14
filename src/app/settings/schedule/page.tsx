@@ -48,6 +48,8 @@ export default function ScheduleSettingsPage() {
         }
       } catch (error) {
         console.error('Failed to fetch schedule settings:', error)
+        setMessage('Failed to load schedule settings. Please refresh the page.')
+        setTimeout(() => setMessage(''), 3000)
       } finally {
         setLoading(false)
       }

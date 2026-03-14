@@ -339,59 +339,98 @@ export const whatsappApi = {
 export const settingsApi = {
   // Get all settings
   getAll: () =>
-    request<{ success: boolean; data: any }>('/settings'),
+    request<{ success: boolean; data: any }>('/settings').catch(error => {
+      console.error('Settings API Error (getAll):', error)
+      throw error
+    }),
 
   // Clinic Settings
   getClinic: () =>
-    request<{ success: boolean; data: any }>('/settings/clinic'),
+    request<{ success: boolean; data: any }>('/settings/clinic').catch(error => {
+      console.error('Settings API Error (getClinic):', error)
+      throw error
+    }),
   updateClinic: (data: any) =>
     request<{ success: boolean; data: any }>('/settings/clinic', {
       method: 'PUT',
       body: JSON.stringify(data),
+    }).catch(error => {
+      console.error('Settings API Error (updateClinic):', error)
+      throw error
     }),
 
   // Doctor Schedule
   getSchedule: () =>
-    request<{ success: boolean; data: any }>('/settings/schedule'),
+    request<{ success: boolean; data: any }>('/settings/schedule').catch(error => {
+      console.error('Settings API Error (getSchedule):', error)
+      throw error
+    }),
   updateSchedule: (data: any) =>
     request<{ success: boolean; data: any }>('/settings/schedule', {
       method: 'PUT',
       body: JSON.stringify(data),
+    }).catch(error => {
+      console.error('Settings API Error (updateSchedule):', error)
+      throw error
     }),
 
   // Appointment Rules
   getRules: () =>
-    request<{ success: boolean; data: any }>('/settings/rules'),
+    request<{ success: boolean; data: any }>('/settings/rules').catch(error => {
+      console.error('Settings API Error (getRules):', error)
+      throw error
+    }),
   updateRules: (data: any) =>
     request<{ success: boolean; data: any }>('/settings/rules', {
       method: 'PUT',
       body: JSON.stringify(data),
+    }).catch(error => {
+      console.error('Settings API Error (updateRules):', error)
+      throw error
     }),
 
   // Notification Settings
   getNotifications: () =>
-    request<{ success: boolean; data: any }>('/settings/notifications'),
+    request<{ success: boolean; data: any }>('/settings/notifications').catch(error => {
+      console.error('Settings API Error (getNotifications):', error)
+      throw error
+    }),
   updateNotifications: (data: any) =>
     request<{ success: boolean; data: any }>('/settings/notifications', {
       method: 'PUT',
       body: JSON.stringify(data),
+    }).catch(error => {
+      console.error('Settings API Error (updateNotifications):', error)
+      throw error
     }),
 
   // Billing Settings
   getBilling: () =>
-    request<{ success: boolean; data: any }>('/settings/billing'),
+    request<{ success: boolean; data: any }>('/settings/billing').catch(error => {
+      console.error('Settings API Error (getBilling):', error)
+      throw error
+    }),
   updateBilling: (data: any) =>
     request<{ success: boolean; data: any }>('/settings/billing', {
       method: 'PUT',
       body: JSON.stringify(data),
+    }).catch(error => {
+      console.error('Settings API Error (updateBilling):', error)
+      throw error
     }),
 
   // System Settings
   getSystem: () =>
-    request<{ success: boolean; data: any }>('/settings/system'),
+    request<{ success: boolean; data: any }>('/settings/system').catch(error => {
+      console.error('Settings API Error (getSystem):', error)
+      throw error
+    }),
   updateSystem: (settings: any) =>
     request<{ success: boolean }>('/settings/system', {
       method: 'PUT',
       body: JSON.stringify({ settings }),
+    }).catch(error => {
+      console.error('Settings API Error (updateSystem):', error)
+      throw error
     }),
 };

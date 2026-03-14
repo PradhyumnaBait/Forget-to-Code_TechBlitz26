@@ -64,14 +64,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const refreshSettings = useCallback(async () => {
     try {
       const [clinicRes, scheduleRes] = await Promise.all([
-        settingsApi.getClinic(),
-        settingsApi.getSchedule()
+        settingsApi.getClinic().catch(() => ({ success: false, data: null })),
+        settingsApi.getSchedule().catch(() => ({ success: false, data: null }))
       ])
 
       setSettings(prev => ({
         ...prev,
-        clinic: clinicRes.success ? clinicRes.data : prev.clinic,
-        schedule: scheduleRes.success ? scheduleRes.data : prev.schedule,
+        clinic: clinicRes.success && clinicRes.data ? { ...prev.clinic, ...clinicRes.data } : prev.clinic,
+        schedule: scheduleRes.success && scheduleRes.data ? { ...prev.schedule, ...scheduleRes.data } : prev.schedule,
         isLoaded: true
       }))
     } catch (error) {

@@ -32,11 +32,12 @@ export default function SettingsOverviewPage() {
     const fetchSettings = async () => {
       try {
         const response = await settingsApi.getAll()
-        if (response.success) {
+        if (response.success && response.data) {
           setSettings(response.data)
         }
       } catch (error) {
         console.error('Failed to fetch settings:', error)
+        // Don't show error message on overview page, just use defaults
       } finally {
         setLoading(false)
       }

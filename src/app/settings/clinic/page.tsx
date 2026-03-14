@@ -38,6 +38,8 @@ export default function ClinicSettingsPage() {
         }
       } catch (error) {
         console.error('Failed to fetch clinic settings:', error)
+        setMessage('Failed to load clinic settings. Please refresh the page.')
+        setTimeout(() => setMessage(''), 3000)
       } finally {
         setLoading(false)
       }
