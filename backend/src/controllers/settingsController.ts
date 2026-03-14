@@ -47,12 +47,12 @@ export const updateClinicSettings = async (
     });
 
     const data = schema.parse(req.body);
-    
-    const settings = await prisma.clinicSettings.upsert({
-      where: { id: req.body.id || 'default' },
-      update: data,
-      create: { ...data, clinicName: data.clinicName || 'MedDesk Clinic' }
-    });
+    const existing = await prisma.clinicSettings.findFirst();
+    const settings = existing
+      ? await prisma.clinicSettings.update({ where: { id: existing.id }, data })
+      : await prisma.clinicSettings.create({
+          data: { ...data, clinicName: data.clinicName || 'MedDesk Clinic' }
+        });
 
     res.json(successResponse('Clinic settings updated', settings));
   } catch (err) {
@@ -98,12 +98,10 @@ export const updateDoctorSchedule = async (
     });
 
     const data = schema.parse(req.body);
-    
-    const schedule = await prisma.doctorSchedule.upsert({
-      where: { id: req.body.id || 'default' },
-      update: data,
-      create: data
-    });
+    const existing = await prisma.doctorSchedule.findFirst();
+    const schedule = existing
+      ? await prisma.doctorSchedule.update({ where: { id: existing.id }, data })
+      : await prisma.doctorSchedule.create({ data });
 
     res.json(successResponse('Doctor schedule updated', schedule));
   } catch (err) {
@@ -147,12 +145,10 @@ export const updateAppointmentRules = async (
     });
 
     const data = schema.parse(req.body);
-    
-    const rules = await prisma.appointmentRules.upsert({
-      where: { id: req.body.id || 'default' },
-      update: data,
-      create: data
-    });
+    const existing = await prisma.appointmentRules.findFirst();
+    const rules = existing
+      ? await prisma.appointmentRules.update({ where: { id: existing.id }, data })
+      : await prisma.appointmentRules.create({ data });
 
     res.json(successResponse('Appointment rules updated', rules));
   } catch (err) {
@@ -195,12 +191,10 @@ export const updateNotificationSettings = async (
     });
 
     const data = schema.parse(req.body);
-    
-    const settings = await prisma.notificationSettings.upsert({
-      where: { id: req.body.id || 'default' },
-      update: data,
-      create: data
-    });
+    const existing = await prisma.notificationSettings.findFirst();
+    const settings = existing
+      ? await prisma.notificationSettings.update({ where: { id: existing.id }, data })
+      : await prisma.notificationSettings.create({ data });
 
     res.json(successResponse('Notification settings updated', settings));
   } catch (err) {
@@ -244,12 +238,10 @@ export const updateBillingSettings = async (
     });
 
     const data = schema.parse(req.body);
-    
-    const settings = await prisma.billingSettings.upsert({
-      where: { id: req.body.id || 'default' },
-      update: data,
-      create: data
-    });
+    const existing = await prisma.billingSettings.findFirst();
+    const settings = existing
+      ? await prisma.billingSettings.update({ where: { id: existing.id }, data })
+      : await prisma.billingSettings.create({ data });
 
     res.json(successResponse('Billing settings updated', settings));
   } catch (err) {

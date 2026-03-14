@@ -23,7 +23,7 @@ export default function ConfirmPage() {
   const [payMode, setPayMode] = useState<'upi' | 'clinic'>('clinic')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [consultationFee] = useState(500)
+  const [consultationFee, setConsultationFee] = useState(500)
 
   // sessionStorage data — read in useEffect (client-only)
   const [dateStr, setDateStr] = useState('')
@@ -44,6 +44,21 @@ export default function ConfirmPage() {
     if (p) setPatient(JSON.parse(p))
     setReady(true)
   }, [router])
+
+  // Load consultation fee from public clinic info (no auth needed)
+  useEffect(() => {
+    const loadFee = async () => {
+      try {
+        const res = await bookingApi.getClinicInfo()
+        if (res.success && res.data?.consultationFee) {
+          setConsultationFee(res.data.consultationFee)
+        }
+      } catch {
+        // fallback 500
+      }
+    }
+    loadFee()
+  }, [])
 
   const displayDate = dateStr ? new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'

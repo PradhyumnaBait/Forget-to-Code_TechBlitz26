@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/environment';
-import { AuthRequest, JWTPayload } from '../types';
+import { AuthRequest, JWTPayload, UserRole } from '../types';
 import prisma from '../config/database';
 
 export const authMiddleware = async (
@@ -20,8 +20,16 @@ export const authMiddleware = async (
       return;
     }
 
-    const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload;
+    const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload & { role?: UserRole | string };
     req.userId = decoded.userId;
+    if (decoded.role) {
+      req.user = {
+        id: decoded.userId,
+        phone: '',
+        name: '',
+        role: decoded.role,
+      };
+    }
 
     // Populate req.patient if the userId maps to a patient
     try {
@@ -54,13 +62,15 @@ export const requireRole = (allowedRoles: string[]) => {
     next: NextFunction
   ): Promise<void> => {
     try {
-      if (!req.userId) {
+      if (!req.userId || !req.user?.role) {
         res.status(401).json({ success: false, message: 'Unauthorized' });
         return;
       }
 
-      // For now, since we don't have a users table per the schema, allow all authenticated
-      // In a future iteration, check role from a users/staff table
+      if (!allowedRoles.includes(req.user.role)) {
+        res.status(403).json({ success: false, message: 'Forbidden' });
+        return;
+      }
       next();
     } catch {
       res

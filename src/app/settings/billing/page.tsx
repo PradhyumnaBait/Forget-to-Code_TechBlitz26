@@ -1,13 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CreditCard, Save, IndianRupee, Percent, Wallet } from 'lucide-react'
+import { CreditCard, Save, IndianRupee, Wallet } from 'lucide-react'
 import { settingsApi } from '@/lib/api'
 
 interface BillingSettings {
   id?: string
   defaultConsultationFee: number
-  taxPercentage: number
   currency: string
   paymentMethods: string[]
   autoGenerateInvoice: boolean
@@ -22,7 +21,6 @@ const PAYMENT_METHODS = [
 export default function BillingSettingsPage() {
   const [settings, setSettings] = useState<BillingSettings>({
     defaultConsultationFee: 500,
-    taxPercentage: 18,
     currency: 'INR',
     paymentMethods: ['cash', 'upi', 'card'],
     autoGenerateInvoice: true,
@@ -36,7 +34,13 @@ export default function BillingSettingsPage() {
       try {
         const response = await settingsApi.getBilling()
         if (response.success && response.data) {
-          setSettings(response.data)
+          const d = response.data as any
+          setSettings({
+            defaultConsultationFee: Number(d.defaultConsultationFee) || 500,
+            currency: d.currency || 'INR',
+            paymentMethods: Array.isArray(d.paymentMethods) ? d.paymentMethods : ['cash', 'upi', 'card'],
+            autoGenerateInvoice: Boolean(d.autoGenerateInvoice !== false),
+          })
         }
       } catch (error) {
         console.error('Failed to fetch billing settings:', error)
@@ -95,9 +99,7 @@ export default function BillingSettingsPage() {
     )
   }
 
-  const taxAmount =
-    (settings.defaultConsultationFee * (Number(settings.taxPercentage) || 0)) / 100
-  const total = settings.defaultConsultationFee + taxAmount
+  const total = settings.defaultConsultationFee
 
   return (
     <div>
@@ -108,7 +110,7 @@ export default function BillingSettingsPage() {
             Billing Settings
           </h2>
           <p className="text-text-secondary mt-1">
-            Configure default consultation fees, taxes and accepted payment methods
+            Configure default consultation fee and accepted payment methods
           </p>
         </div>
         <button
@@ -134,8 +136,8 @@ export default function BillingSettingsPage() {
       )}
 
       <div className="space-y-8">
-        {/* Fee & tax */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Consultation fee */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="label">Default Consultation Fee</label>
             <div className="relative">
@@ -150,23 +152,6 @@ export default function BillingSettingsPage() {
                     'defaultConsultationFee',
                     parseFloat(e.target.value) || 0
                   )
-                }
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="label">Tax Percentage (GST)</label>
-            <div className="relative">
-              <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-              <input
-                type="number"
-                className="input pl-9"
-                min={0}
-                max={100}
-                value={settings.taxPercentage}
-                onChange={(e) =>
-                  handleChange('taxPercentage', parseFloat(e.target.value) || 0)
                 }
               />
             </div>
@@ -253,17 +238,7 @@ export default function BillingSettingsPage() {
           Consultation fee:{' '}
           <span className="font-semibold">
             {settings.currency === 'INR' ? '₹' : '$'}
-            {settings.defaultConsultationFee.toFixed(2)}
-          </span>{' '}
-          +{' '}
-          <span className="font-semibold">
-            {settings.taxPercentage.toFixed(2)}% tax ({settings.currency === 'INR' ? '₹' : '$'}
-            {taxAmount.toFixed(2)})
-          </span>{' '}
-          ={' '}
-          <span className="font-semibold">
-            {settings.currency === 'INR' ? '₹' : '$'}
-            {total.toFixed(2)}
+            {(Number(settings.defaultConsultationFee) || 0).toFixed(2)}
           </span>
           . Accepted payments:{' '}
           <span className="font-semibold">

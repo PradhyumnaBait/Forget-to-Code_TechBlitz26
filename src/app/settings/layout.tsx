@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { 
   Settings, 
   Building2, 
@@ -34,7 +34,34 @@ export default function SettingsLayout({
 }: {
   children: React.ReactNode
 }) {
+  const router = useRouter()
   const pathname = usePathname()
+  const [authChecked, setAuthChecked] = useState(false)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { settingsApi } = await import('@/lib/api')
+        await settingsApi.getAll()
+        setAuthChecked(true)
+      } catch {
+        router.replace(`/admin/login?redirect=${encodeURIComponent(pathname || '/settings')}`)
+      }
+    }
+    checkAuth()
+  }, [router, pathname])
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-text-secondary">Verifying admin access…</p>
+          <p className="text-sm text-text-muted mt-2">Redirecting to login if needed</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-brand-bg">

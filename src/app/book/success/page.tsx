@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import { CheckCircle, Calendar, Download, MessageCircle } from 'lucide-react'
+import { bookingApi } from '@/lib/api'
 
 function to12h(t: string): string {
   if (!t) return '—'
@@ -36,6 +37,7 @@ export default function BookingSuccessPage() {
   const [appointment, setAppointment] = useState<any>(null)
   const [dateStr, setDateStr] = useState('')     // e.g. "2026-03-14"
   const [slotStr, setSlotStr] = useState('')     // e.g. "10:00"
+  const [consultationFee, setConsultationFee] = useState(500)
   const printRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -58,6 +60,20 @@ export default function BookingSuccessPage() {
     // 4. clean up transient session items (keep patient for potential relogin)
     sessionStorage.removeItem('md_slot')
     sessionStorage.removeItem('md_date')
+  }, [])
+
+  useEffect(() => {
+    const loadFee = async () => {
+      try {
+        const res = await bookingApi.getClinicInfo()
+        if (res.success && res.data?.consultationFee) {
+          setConsultationFee(res.data.consultationFee)
+        }
+      } catch {
+        // fallback 500
+      }
+    }
+    loadFee()
   }, [])
 
   const appointmentId = appointment?.id
@@ -128,7 +144,7 @@ export default function BookingSuccessPage() {
               </div>
               <div class="field">
                 <label>Consultation Fee</label>
-                <span>₹500</span>
+                <span>₹${consultationFee}</span>
               </div>
             </div>
             <div class="note">
@@ -209,7 +225,7 @@ export default function BookingSuccessPage() {
               { label: 'Date', value: shortDate },
               { label: 'Time', value: displayTime },
               { label: 'Payment', value: paymentLabel },
-              { label: 'Consultation Fee', value: '₹500' },
+              { label: 'Consultation Fee', value: `₹${consultationFee}` },
             ].map(({ label, value }) => (
               <div key={label}>
                 <p className="text-xs text-text-muted font-medium uppercase tracking-widest mb-0.5">{label}</p>

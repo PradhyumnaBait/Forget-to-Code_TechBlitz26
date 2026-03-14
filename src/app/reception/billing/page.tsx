@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
   FileText, IndianRupee, Plus, Printer, CheckCircle, Smartphone,
   Trash2, MessageSquare, Search, X, Loader2, Save, Percent, Clock, Users, RefreshCw
 } from 'lucide-react'
 import PrintableInvoice from '@/components/billing/PrintableInvoice'
-import { patientApi, appointmentApi } from '@/lib/api'
+import { patientApi, appointmentApi, bookingApi } from '@/lib/api'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Item {
@@ -257,8 +257,22 @@ const recentBills = [
 ]
 
 export default function BillingPage() {
+  const [defaultConsultationFee, setDefaultConsultationFee] = useState(500)
+  const defaultItems = useMemo(
+    () => [
+      { id: '1', name: 'Dr. Ananya Sharma — General Consultation', description: 'General OPD visit', qty: 1, price: defaultConsultationFee },
+      ...DEFAULT_ITEMS.slice(1),
+    ],
+    [defaultConsultationFee]
+  )
   const [items, setItems] = useState<Item[]>(DEFAULT_ITEMS)
   const [discountPct, setDiscountPct] = useState(0)   // percentage discount
+
+  useEffect(() => {
+    bookingApi.getClinicInfo().then((r) => {
+      if (r.success && r.data?.consultationFee) setDefaultConsultationFee(r.data.consultationFee)
+    }).catch(() => {})
+  }, [])
   const [payMode, setPayMode] = useState<'upi' | 'cash'>('upi')
 
   const [received, setReceived] = useState('700')
@@ -302,7 +316,7 @@ export default function BillingPage() {
       setTimeout(() => {
         setPaidSuccess(false)
         // Reset form for next patient
-        setItems(DEFAULT_ITEMS)
+        setItems([...defaultItems])
         setDiscountPct(0)
         setPayMode('upi')
         setReceived('700')
@@ -315,7 +329,7 @@ export default function BillingPage() {
   // Auto-load patient + billing items from a completed appointment
   const handlePendingSelect = (sel: PendingBillItem) => {
     setPatient({ id: sel.patientId, name: sel.patientName, phone: sel.patientPhone })
-    const consultationFee: Item = { id: '__consult', name: 'Dr. Consultation Fee', description: sel.consultation?.diagnosis ?? 'General OPD visit', qty: 1, price: 500 }
+    const consultationFee: Item = { id: '__consult', name: 'Dr. Consultation Fee', description: sel.consultation?.diagnosis ?? 'General OPD visit', qty: 1, price: defaultConsultationFee }
     const prescItems: Item[] = (sel.prescriptions ?? []).map((p: any, i: number) => ({
       id: `__rx_${i}`,
       name: `${p.medicine}${p.dose ? ` — ${p.dose}` : ''}`,

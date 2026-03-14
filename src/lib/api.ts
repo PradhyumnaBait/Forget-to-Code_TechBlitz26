@@ -58,12 +58,24 @@ export const authApi = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+
+  // Admin login for protected settings
+  adminLogin: (username: string, password: string) =>
+    request<{ success: boolean; data: { token: string; role: string } }>('/auth/admin-login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
 };
 
 // ─── Booking ────────────────────────────────────────────────────────────
 export const bookingApi = {
   getAvailableDates: () =>
     request<{ success: boolean; data: { dates: string[] } }>('/bookings/available-dates'),
+
+  getClinicInfo: () =>
+    request<{ success: boolean; data: { consultationFee: number; clinicName: string } }>(
+      '/bookings/clinic-info'
+    ),
 
   getSlots: (date: string) =>
     request<{ success: boolean; data: { date: string; availableSlots: string[] } }>(

@@ -1,8 +1,9 @@
 import { Response, NextFunction } from 'express';
-import { AuthRequest, successResponse, errorResponse } from '../types';
+import { AuthRequest, successResponse, errorResponse, UserRole } from '../types';
 import { otpService } from '../services/otpService';
 import { z } from 'zod';
 import prisma from '../config/database';
+import { env } from '../config/environment';
 
 const sendOtpSchema = z.object({
   phone: z.string().min(10).max(15),
@@ -139,6 +140,41 @@ export const staffLogin = async (
     );
 
     res.json(successResponse('Staff login successful', { token, role }));
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Admin login — only ADMIN can access sensitive settings
+export const adminLogin = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { username, password } = z
+      .object({
+        username: z.string().email(),
+        password: z.string().min(6),
+      })
+      .parse(req.body);
+
+    const expectedUser = process.env.ADMIN_EMAIL || 'admin@meddesk.in';
+    const expectedPass = process.env.ADMIN_PASSWORD || 'MedDesk@2026';
+
+    if (username !== expectedUser || password !== expectedPass) {
+      res.status(401).json(errorResponse('Invalid admin credentials'));
+      return;
+    }
+
+    const jwt = await import('jsonwebtoken');
+    const token = jwt.default.sign(
+      { userId: 'admin', role: UserRole.ADMIN },
+      env.JWT_SECRET,
+      { expiresIn: '12h' }
+    );
+
+    res.json(successResponse('Admin login successful', { token, role: UserRole.ADMIN }));
   } catch (err) {
     next(err);
   }

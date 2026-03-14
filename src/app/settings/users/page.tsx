@@ -25,6 +25,8 @@ const ROLE_LABELS: Record<Role, string> = {
   reception: 'Receptionist',
 }
 
+const DEFAULT_USER_IDS = new Set(['doctor-1', 'reception-1'])
+
 export default function UserManagementSettingsPage() {
   const [users, setUsers] = useState<StaffUser[]>([])
   const [loading, setLoading] = useState(true)
@@ -117,6 +119,7 @@ export default function UserManagementSettingsPage() {
   }
 
   const deleteUser = (id: string) => {
+    if (DEFAULT_USER_IDS.has(id)) return
     setUsers(prev => prev.filter(u => u.id !== id))
   }
 
@@ -242,7 +245,12 @@ export default function UserManagementSettingsPage() {
               <button
                 type="button"
                 onClick={() => deleteUser(user.id)}
-                className="p-2 rounded-full hover:bg-danger-light text-danger"
+                disabled={DEFAULT_USER_IDS.has(user.id)}
+                className={`p-2 rounded-full ${
+                  DEFAULT_USER_IDS.has(user.id)
+                    ? 'text-text-muted cursor-not-allowed'
+                    : 'hover:bg-danger-light text-danger'
+                }`}
               >
                 <Trash2 className="w-4 h-4" />
               </button>

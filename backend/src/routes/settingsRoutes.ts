@@ -14,12 +14,12 @@ import {
   updateSystemSettings,
   getAllSettings
 } from '../controllers/settingsController';
-import { authMiddleware } from '../middlewares/authMiddleware';
+import { authMiddleware, requireRole } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-// All settings routes require authentication
-router.use(authMiddleware);
+// All settings routes require admin authentication
+router.use(authMiddleware, requireRole(['ADMIN']));
 
 // Get all settings at once
 router.get('/', getAllSettings);

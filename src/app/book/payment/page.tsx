@@ -1,17 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Shield, CheckCircle, QrCode, CreditCard, Smartphone, ScanLine } from 'lucide-react'
 import StepProgressBar from '@/components/booking/StepProgressBar'
+import { bookingApi } from '@/lib/api'
 
 type PayMode = 'upi' | 'card' | 'qr'
 
 export default function PaymentPage() {
   const router = useRouter()
+  const [consultationFee, setConsultationFee] = useState(500)
   const [mode, setMode] = useState<PayMode>('upi')
   const [upiId, setUpiId] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    bookingApi.getClinicInfo().then((r) => {
+      if (r.success && r.data?.consultationFee) setConsultationFee(r.data.consultationFee)
+    }).catch(() => {})
+  }, [])
 
   const handlePay = () => {
     setLoading(true)
@@ -27,7 +35,7 @@ export default function PaymentPage() {
         <div className="bg-gradient-to-r from-primary to-accent rounded-xl p-4 mb-6 flex items-center justify-between text-white">
           <div>
             <p className="text-sm font-medium opacity-80">Amount to Pay</p>
-            <p className="text-3xl font-extrabold">₹500</p>
+            <p className="text-3xl font-extrabold">₹{consultationFee}</p>
             <p className="text-xs opacity-70 mt-1">Dr. Ananya Sharma · Mar 18 · 10:30 AM</p>
           </div>
           <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
@@ -138,7 +146,7 @@ export default function PaymentPage() {
               Processing…
             </>
           ) : (
-            <>Pay ₹500 Securely <ArrowRight className="w-4 h-4" /></>
+            <>Pay ₹{consultationFee} Securely <ArrowRight className="w-4 h-4" /></>
           )}
         </button>
       </div>

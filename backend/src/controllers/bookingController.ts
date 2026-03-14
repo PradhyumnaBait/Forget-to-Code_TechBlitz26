@@ -2,7 +2,27 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest, successResponse, errorResponse } from '../types';
 import { bookingService } from '../services/bookingService';
 import { slotService } from '../services/slotService';
+import prisma from '../config/database';
 import { z } from 'zod';
+
+// Public endpoint for booking flow - returns consultation fee & clinic name
+export const getClinicInfo = async (
+  _req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const settings = await prisma.clinicSettings.findFirst();
+    res.json(
+      successResponse('Clinic info', {
+        consultationFee: settings ? Number(settings.consultationFee) : 500,
+        clinicName: settings?.clinicName ?? 'MedDesk Clinic',
+      })
+    );
+  } catch (err) {
+    next(err);
+  }
+};
 
 const createAppointmentSchema = z.object({
   patientName: z.string().min(2),
