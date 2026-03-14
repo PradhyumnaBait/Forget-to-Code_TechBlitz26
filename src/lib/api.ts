@@ -45,6 +45,11 @@ export const authApi = {
       { method: 'POST', body: JSON.stringify({ phone, otp, name, age }) }
     ),
 
+  getCurrentOtp: (phone: string) =>
+    request<{ success: boolean; data: { otp: string; expiresAt: string; attemptsRemaining: number } }>(
+      `/auth/current-otp?phone=${encodeURIComponent(phone)}`
+    ),
+
   getProfile: () =>
     request<{ success: boolean; data: Record<string, unknown> }>('/auth/profile'),
 

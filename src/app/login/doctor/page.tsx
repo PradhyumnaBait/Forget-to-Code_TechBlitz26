@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Stethoscope, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react'
+import { Stethoscope, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Copy, Check, User } from 'lucide-react'
 import { useAuth } from '@/lib/authContext'
 
 // Hardcoded demo credentials for staff (doctor login)
@@ -18,8 +18,31 @@ export default function DoctorLoginPage() {
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [copiedEmail, setCopiedEmail] = useState(false)
+  const [copiedPassword, setCopiedPassword] = useState(false)
 
   const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api'
+
+  const copyToClipboard = async (text: string, type: 'email' | 'password') => {
+    try {
+      await navigator.clipboard.writeText(text)
+      if (type === 'email') {
+        setCopiedEmail(true)
+        setTimeout(() => setCopiedEmail(false), 2000)
+      } else {
+        setCopiedPassword(true)
+        setTimeout(() => setCopiedPassword(false), 2000)
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  const useCredentials = () => {
+    setEmail(DOCTOR_EMAIL)
+    setPassword(DOCTOR_PASSWORD)
+    setError('')
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,8 +83,53 @@ export default function DoctorLoginPage() {
         </div>
 
         <div className="card p-6 shadow-md">
-          <div className="bg-primary-light border border-primary/20 rounded-xl px-4 py-3 mb-5 text-xs text-primary font-medium">
-            🔑 Demo Mode: Use any email and password to sign in
+          {/* Demo Credentials Display */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <User className="w-4 h-4 text-green-600" />
+              <span className="text-sm font-semibold text-green-800">Demo Doctor Credentials</span>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-green-100">
+                <div>
+                  <div className="text-xs text-green-600 font-medium">Email</div>
+                  <code className="text-sm font-mono text-green-900">{DOCTOR_EMAIL}</code>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(DOCTOR_EMAIL, 'email')}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-md transition-colors"
+                >
+                  {copiedEmail ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copiedEmail ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-green-100">
+                <div>
+                  <div className="text-xs text-green-600 font-medium">Password</div>
+                  <code className="text-sm font-mono text-green-900">{DOCTOR_PASSWORD}</code>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(DOCTOR_PASSWORD, 'password')}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-md transition-colors"
+                >
+                  {copiedPassword ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copiedPassword ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+            </div>
+            
+            <button
+              onClick={useCredentials}
+              className="w-full mt-3 px-3 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+            >
+              Use These Credentials
+            </button>
+            
+            <p className="text-xs text-green-600 mt-2">
+              💡 Click "Use These Credentials" to auto-fill the form below for quick testing.
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -72,7 +140,7 @@ export default function DoctorLoginPage() {
                 <input
                   type="email"
                   className="input pl-9"
-                  placeholder="any-email@example.com"
+                  placeholder="Enter email address"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                 />
@@ -86,7 +154,7 @@ export default function DoctorLoginPage() {
                 <input
                   type={showPw ? 'text' : 'password'}
                   className="input pl-9 pr-10"
-                  placeholder="any-password"
+                  placeholder="Enter password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                 />

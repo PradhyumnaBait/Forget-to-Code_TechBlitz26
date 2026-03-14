@@ -144,3 +144,46 @@ export const staffLogin = async (
   }
 };
 
+// Demo endpoint to fetch current OTP for testing purposes
+export const getCurrentOTP = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { phone } = z.object({
+      phone: z.string().min(10).max(15),
+    }).parse(req.query);
+
+    // Only allow in development mode
+    if (process.env.NODE_ENV !== 'development') {
+      res.status(403).json(errorResponse('This endpoint is only available in development mode'));
+      return;
+    }
+
+    // Fetch the current OTP from database
+    const otpRecord = await prisma.oTP.findUnique({
+      where: { phone },
+    });
+
+    if (!otpRecord) {
+      res.status(404).json(errorResponse('No OTP found for this phone number'));
+      return;
+    }
+
+    // Check if OTP is still valid
+    if (otpRecord.expiresAt < new Date()) {
+      res.status(410).json(errorResponse('OTP has expired'));
+      return;
+    }
+
+    res.json(successResponse('Current OTP retrieved', { 
+      otp: otpRecord.code,
+      expiresAt: otpRecord.expiresAt,
+      attemptsRemaining: otpRecord.maxAttempts - otpRecord.attempts
+    }));
+  } catch (err) {
+    next(err);
+  }
+};
+

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { User, Phone, Hash, FileText, ArrowRight, AlertCircle } from 'lucide-react'
+import { User, Phone, Hash, FileText, ArrowRight, AlertCircle, TestTube } from 'lucide-react'
 import StepProgressBar from '@/components/booking/StepProgressBar'
 import { authApi } from '@/lib/api'
 
@@ -13,6 +13,11 @@ export default function PatientDetailsPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
+
+  const useDemoData = (phoneNumber: string, name: string) => {
+    setForm(f => ({ ...f, phone: phoneNumber, name: name, age: '30' }))
+    setErrors({})
+  }
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -50,6 +55,33 @@ export default function PatientDetailsPage() {
           <p className="text-sm text-text-secondary mt-1">
             We need a few details to book your appointment securely.
           </p>
+        </div>
+
+        {/* Demo Data Helper */}
+        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <TestTube className="w-4 h-4 text-cyan-600" />
+            <span className="text-sm font-semibold text-cyan-800">Quick Demo Data</span>
+          </div>
+          <p className="text-xs text-cyan-700 mb-3">
+            Use these demo phone numbers for testing. The actual backend-generated OTP will be displayed on the next page.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => useDemoData('9999999999', 'Demo Patient')}
+              className="px-3 py-1.5 text-xs font-medium text-cyan-700 bg-cyan-100 hover:bg-cyan-200 rounded-md transition-colors"
+            >
+              📱 9999999999 (Demo Patient)
+            </button>
+            <button
+              type="button"
+              onClick={() => useDemoData('9876543210', 'Test User')}
+              className="px-3 py-1.5 text-xs font-medium text-cyan-700 bg-cyan-100 hover:bg-cyan-200 rounded-md transition-colors"
+            >
+              📱 9876543210 (Test User)
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

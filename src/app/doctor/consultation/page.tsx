@@ -139,18 +139,15 @@ function ConsultationContent() {
       try { await consultationApi.start(appointment.id) } catch { /* existing session */ }
       
       // Save notes
-      await consultationApi.saveNotes({
+      const notesRes = await consultationApi.saveNotes({
         appointmentId: appointment.id,
         patientId: patient.id,
         notes: symptoms,
         diagnosis,
         advice,
       })
+      const consultId = (notesRes.data as any)?.id
 
-      // Try get consultation ID created
-      const appRefetch = await import('@/lib/api').then(m => m.appointmentApi.getById(appointment.id))
-      const consultId = (appRefetch.data as any)?.consultation?.id
-      
       // Save prescriptons
       if (consultId && medicines.length > 0) {
         const validMeds = medicines.filter(m => m.medicine.trim())
@@ -158,7 +155,13 @@ function ConsultationContent() {
           await prescriptionApi.createBulk({
             consultationId: consultId,
             patientId: patient.id,
-            medicines: validMeds.map(m => ({ ...m, frequency: 'Daily' }))
+            medicines: validMeds.map(m => ({
+              medicine: m.medicine.trim(),
+              dose: m.dose?.trim() || '1-0-1',
+              frequency: 'Daily',
+              duration: Number(m.duration) || 3,
+              notes: m.notes?.trim() || ''
+            }))
           })
         }
       }
@@ -167,9 +170,9 @@ function ConsultationContent() {
       await queueApi.complete(appointment.id)
       
       router.push('/doctor')
-    } catch (e) {
+    } catch (e: any) {
       console.error(e)
-      alert("Failed to save consultation. Check console.")
+      alert(e.message || "Failed to save consultation. Check console.")
     } finally {
       setSaving(false)
     }
