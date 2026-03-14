@@ -61,9 +61,9 @@ export default function ReceptionDashboard() {
   }, [load])
 
   const totalToday = appointments.length
-  const queueSize = queueData?.totalInQueue ?? 0
-  const consultingPatient = queueData?.current?.patient?.name ?? 'None'
-  const estimatedWait = queueData?.estimatedWaitMinutes ?? 0
+  const queueSize = (queueData as any)?.queueLength ?? (queueData as any)?.totalInQueue ?? 0
+  const consultingPatient = (queueData as any)?.current?.patient?.name ?? 'None'
+  const estimatedWait = (queueData as any)?.estimatedWaitMinutes ?? (queueSize * 15)
 
   const kpis = [
     {

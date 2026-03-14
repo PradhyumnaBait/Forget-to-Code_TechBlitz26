@@ -125,6 +125,15 @@ export const queueApi = {
   status: () =>
     request<{ success: boolean; data: unknown }>('/queue/status'),
 
+  list: () =>
+    request<{ success: boolean; data: {
+      appointments: any[];
+      waiting: any[];
+      current: any | null;
+      estimatedWaitMinutes: number;
+      total: number;
+    } }>('/queue/list'),
+
   position: (appointmentId: string) =>
     request<{ success: boolean; data: unknown }>(`/queue/position/${appointmentId}`),
 

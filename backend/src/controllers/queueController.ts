@@ -92,3 +92,27 @@ export const markNoShow = async (
     next(err);
   }
 };
+
+export const getQueueList = async (
+  _req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const queue = await queueService.getCurrentQueue();
+    // Return full waiting + current arrays for Waitlist page
+    const all = [
+      ...(queue.current ? [queue.current] : []),
+      ...(queue.waiting ?? []),
+    ];
+    res.json(successResponse('Queue list', {
+      total: all.length,
+      current: queue.current ?? null,
+      waiting: queue.waiting ?? [],
+      estimatedWaitMinutes: queue.estimatedWaitMinutes ?? 0,
+      appointments: all,
+    }));
+  } catch (err) {
+    next(err);
+  }
+};
