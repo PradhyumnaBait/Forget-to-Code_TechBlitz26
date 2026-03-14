@@ -248,7 +248,6 @@ model NotificationSettings {
 model BillingSettings {
   id                     String   @id @default(cuid())
   defaultConsultationFee Decimal  @default(500) @db.Decimal(10, 2)
-  taxPercentage          Decimal  @default(18) @db.Decimal(5, 2)
   currency               String   @default("INR") @db.VarChar(10)
   paymentMethods         String[] @default(["cash", "upi", "card"])
   autoGenerateInvoice    Boolean  @default(true)

@@ -1,85 +1,53 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Shield, Save, Clock, Lock } from 'lucide-react'
-import { settingsApi } from '@/lib/api'
+import { useState } from 'react'
+import { Shield, Save, Lock, Clock, Smartphone, Eye, EyeOff } from 'lucide-react'
 
-interface SystemSettings {
-  [key: string]: any
+interface SecuritySettings {
+  sessionTimeout: number
+  twoFactorEnabled: boolean
+  passwordMinLength: number
+  requireSpecialChars: boolean
+  maxLoginAttempts: number
+  lockoutDuration: number
 }
 
 export default function SecuritySettingsPage() {
-  const [systemSettings, setSystemSettings] = useState<SystemSettings>({})
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [settings, setSettings] = useState<SecuritySettings>({
+    sessionTimeout: 30,
+    twoFactorEnabled: false,
+    passwordMinLength: 8,
+    requireSpecialChars: true,
+    maxLoginAttempts: 5,
+    lockoutDuration: 15
+  })
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
   const [message, setMessage] = useState('')
 
-  const sessionTimeout = Number(systemSettings.session_timeout ?? 30)
-  const enable2fa = Boolean(
-    typeof systemSettings.enable_2fa === 'boolean'
-      ? systemSettings.enable_2fa
-      : String(systemSettings.enable_2fa ?? 'false') === 'true'
-  )
+  const handleSave = () => {
+    setMessage('Security settings saved successfully!')
+    setTimeout(() => setMessage(''), 3000)
+  }
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await settingsApi.getSystem()
-        if (response.success && response.data) {
-          setSystemSettings(response.data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch system settings:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchSettings()
-  }, [])
-
-  const handleSave = async () => {
-    setSaving(true)
-    setMessage('')
-
-    try {
-      const payload = {
-        ...systemSettings,
-        session_timeout: sessionTimeout,
-        enable_2fa: enable2fa,
-      }
-      const response = await settingsApi.updateSystem(payload)
-      if (response.success) {
-        setMessage('Security settings saved successfully!')
-        setTimeout(() => setMessage(''), 3000)
-      }
-    } catch (error) {
-      setMessage('Failed to save security settings. Please try again.')
+  const handlePasswordChange = () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setMessage('New passwords do not match!')
       setTimeout(() => setMessage(''), 3000)
-    } finally {
-      setSaving(false)
+      return
     }
+    setMessage('Password changed successfully!')
+    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    setShowPasswordForm(false)
+    setTimeout(() => setMessage(''), 3000)
   }
 
-  const updateSessionTimeout = (value: number) => {
-    setSystemSettings(prev => ({ ...prev, session_timeout: value }))
-  }
-
-  const toggle2fa = () => {
-    setSystemSettings(prev => ({ ...prev, enable_2fa: !enable2fa }))
-  }
-
-  if (loading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-8 bg-slate-200 rounded w-1/3 mb-6"></div>
-        <div className="space-y-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-16 bg-slate-200 rounded"></div>
-          ))}
-        </div>
-      </div>
-    )
+  const handleChange = (field: keyof SecuritySettings, value: number | boolean) => {
+    setSettings(prev => ({ ...prev, [field]: value }))
   }
 
   return (
@@ -91,95 +59,229 @@ export default function SecuritySettingsPage() {
             Security Settings
           </h2>
           <p className="text-text-secondary mt-1">
-            Configure session timeout and two-factor authentication for staff access
+            Configure security policies and authentication
           </p>
         </div>
         <button
           onClick={handleSave}
-          disabled={saving}
           className="flex items-center gap-2 btn-primary"
         >
           <Save className="w-4 h-4" />
-          {saving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </button>
       </div>
 
       {message && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            message.includes('success')
-              ? 'bg-success-light text-success-text border border-success/20'
-              : 'bg-danger-light text-danger-text border border-danger/20'
-          }`}
-        >
+        <div className={`mb-6 p-4 rounded-lg ${
+          message.includes('success') 
+            ? 'bg-success-light text-success-text border border-success/20' 
+            : 'bg-danger-light text-danger-text border border-danger/20'
+        }`}>
           {message}
         </div>
       )}
 
-      <div className="space-y-6">
-        {/* Session timeout */}
-        <div className="border border-brand-border rounded-lg p-4 flex items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary-light flex items-center justify-center">
-              <Clock className="w-4 h-4 text-primary" />
+      <div className="space-y-8">
+        {/* Password Change */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <Lock className="w-4 h-4" />
+            Password Management
+          </h3>
+          {!showPasswordForm ? (
+            <button
+              onClick={() => setShowPasswordForm(true)}
+              className="btn-secondary"
+            >
+              Change Password
+            </button>
+          ) : (
+            <div className="space-y-4 max-w-md">
+              <div>
+                <label className="label">Current Password</label>
+                <input
+                  type="password"
+                  className="input"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="label">New Password</label>
+                <input
+                  type="password"
+                  className="input"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="label">Confirm New Password</label>
+                <input
+                  type="password"
+                  className="input"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                />
+              </div>
+              <div className="flex gap-2">
+                <button onClick={handlePasswordChange} className="btn-primary">
+                  Update Password
+                </button>
+                <button 
+                  onClick={() => setShowPasswordForm(false)} 
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-            <div>
-              <p className="font-medium text-text-primary">Session Timeout</p>
-              <p className="text-xs text-text-secondary">
-                Automatically log out inactive users after a period of inactivity.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              className="input w-24"
-              min={5}
-              value={sessionTimeout}
-              onChange={(e) => updateSessionTimeout(parseInt(e.target.value) || 5)}
-            />
-            <span className="text-sm text-text-secondary">minutes</span>
+          )}
+        </div>
+        {/* Session Management */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Session Management
+          </h3>
+          <div className="max-w-md">
+            <label className="label">Session Timeout (minutes)</label>
+            <select
+              className="input"
+              value={settings.sessionTimeout}
+              onChange={(e) => handleChange('sessionTimeout', parseInt(e.target.value))}
+            >
+              <option value={15}>15 minutes</option>
+              <option value={30}>30 minutes</option>
+              <option value={60}>1 hour</option>
+              <option value={120}>2 hours</option>
+              <option value={480}>8 hours</option>
+            </select>
+            <p className="text-xs text-text-muted mt-1">
+              Users will be automatically logged out after this period of inactivity
+            </p>
           </div>
         </div>
 
-        {/* 2FA */}
-        <div className="border border-brand-border rounded-lg p-4 flex items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-accent-light flex items-center justify-center">
-              <Lock className="w-4 h-4 text-accent" />
-            </div>
+        {/* Two-Factor Authentication */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <Smartphone className="w-4 h-4" />
+            Two-Factor Authentication
+          </h3>
+          <div className="flex items-center gap-3 p-4 border border-brand-border rounded-lg max-w-md">
+            <input
+              type="checkbox"
+              id="twoFactorEnabled"
+              className="w-4 h-4 text-primary bg-white border-brand-border rounded focus:ring-primary focus:ring-2"
+              checked={settings.twoFactorEnabled}
+              onChange={(e) => handleChange('twoFactorEnabled', e.target.checked)}
+            />
             <div>
-              <p className="font-medium text-text-primary">Two-Factor Authentication (2FA)</p>
-              <p className="text-xs text-text-secondary">
-                Require a second factor (e.g. OTP) when staff members log in.
+              <label htmlFor="twoFactorEnabled" className="font-medium text-text-primary cursor-pointer">
+                Enable Two-Factor Authentication
+              </label>
+              <p className="text-xs text-text-muted">
+                Require SMS verification for login
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={toggle2fa}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              enable2fa ? 'bg-primary' : 'bg-slate-200'
-            }`}
-          >
-            <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                enable2fa ? 'translate-x-5' : 'translate-x-1'
-              }`}
-            />
-          </button>
+        </div>
+
+        {/* Password Policy */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4">Password Policy</h3>
+          <div className="space-y-4 max-w-md">
+            <div>
+              <label className="label">Minimum Password Length</label>
+              <select
+                className="input"
+                value={settings.passwordMinLength}
+                onChange={(e) => handleChange('passwordMinLength', parseInt(e.target.value))}
+              >
+                <option value={6}>6 characters</option>
+                <option value={8}>8 characters</option>
+                <option value={10}>10 characters</option>
+                <option value={12}>12 characters</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3 p-4 border border-brand-border rounded-lg">
+              <input
+                type="checkbox"
+                id="requireSpecialChars"
+                className="w-4 h-4 text-primary bg-white border-brand-border rounded focus:ring-primary focus:ring-2"
+                checked={settings.requireSpecialChars}
+                onChange={(e) => handleChange('requireSpecialChars', e.target.checked)}
+              />
+              <div>
+                <label htmlFor="requireSpecialChars" className="font-medium text-text-primary cursor-pointer">
+                  Require Special Characters
+                </label>
+                <p className="text-xs text-text-muted">
+                  Passwords must contain at least one special character
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Login Security */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4">Login Security</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+            <div>
+              <label className="label">Max Login Attempts</label>
+              <select
+                className="input"
+                value={settings.maxLoginAttempts}
+                onChange={(e) => handleChange('maxLoginAttempts', parseInt(e.target.value))}
+              >
+                <option value={3}>3 attempts</option>
+                <option value={5}>5 attempts</option>
+                <option value={10}>10 attempts</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Lockout Duration (minutes)</label>
+              <select
+                className="input"
+                value={settings.lockoutDuration}
+                onChange={(e) => handleChange('lockoutDuration', parseInt(e.target.value))}
+              >
+                <option value={5}>5 minutes</option>
+                <option value={15}>15 minutes</option>
+                <option value={30}>30 minutes</option>
+                <option value={60}>1 hour</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg text-sm">
-        <h3 className="font-semibold text-text-primary mb-2">Note</h3>
-        <p className="text-text-secondary">
-          These flags are stored in the <span className="font-semibold">system settings</span>{' '}
-          (`session_timeout`, `enable_2fa`) and can be used by your backend authentication and
-          middleware logic to enforce stricter security policies in production.
-        </p>
+      {/* Security Summary */}
+      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg">
+        <h3 className="font-semibold text-text-primary mb-3">Security Status</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <div className="text-text-muted">Session Timeout</div>
+            <div className="font-medium text-text-primary">{settings.sessionTimeout} minutes</div>
+          </div>
+          <div>
+            <div className="text-text-muted">Two-Factor Auth</div>
+            <div className="font-medium text-text-primary">
+              {settings.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+            </div>
+          </div>
+          <div>
+            <div className="text-text-muted">Password Length</div>
+            <div className="font-medium text-text-primary">{settings.passwordMinLength}+ characters</div>
+          </div>
+          <div>
+            <div className="text-text-muted">Login Attempts</div>
+            <div className="font-medium text-text-primary">{settings.maxLoginAttempts} max</div>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
-

@@ -41,11 +41,24 @@ export default function SettingsLayout({
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Check if user has admin role and valid token
+        const staffRole = localStorage.getItem('md_staff_role')
+        const token = localStorage.getItem('md_token')
+        
+        if (staffRole !== 'admin' || !token) {
+          throw new Error('No admin access')
+        }
+        
+        // Verify token with backend
         const { settingsApi } = await import('@/lib/api')
         await settingsApi.getAll()
         setAuthChecked(true)
-      } catch {
-        router.replace(`/admin/login?redirect=${encodeURIComponent(pathname || '/settings')}`)
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        // Clear invalid tokens
+        localStorage.removeItem('md_token')
+        localStorage.removeItem('md_staff_role')
+        router.replace(`/login/admin?redirect=${encodeURIComponent(pathname || '/settings')}`)
       }
     }
     checkAuth()

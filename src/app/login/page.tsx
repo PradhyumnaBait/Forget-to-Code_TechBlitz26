@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Stethoscope, UserCog, ChevronRight, HeartPulse } from 'lucide-react'
+import { Stethoscope, UserCog, Settings, ChevronRight, HeartPulse } from 'lucide-react'
 
 export default function LoginPage() {
   return (
@@ -14,7 +14,7 @@ export default function LoginPage() {
       </div>
 
       {/* Role cards */}
-      <div className="flex flex-col sm:flex-row gap-5 w-full max-w-xl">
+      <div className="flex flex-col sm:flex-row gap-5 w-full max-w-4xl">
         {/* Doctor */}
         <Link
           href="/login/doctor"
@@ -49,6 +49,25 @@ export default function LoginPage() {
             </p>
           </div>
           <div className="flex items-center gap-1.5 text-sm font-semibold text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            Continue <ChevronRight className="w-4 h-4" />
+          </div>
+        </Link>
+
+        {/* Admin */}
+        <Link
+          href="/login/admin"
+          className="group flex-1 bg-white border-2 border-brand-border rounded-2xl p-7 flex flex-col items-start gap-4 hover:border-orange-500 hover:shadow-lg transition-all duration-200 cursor-pointer"
+        >
+          <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center group-hover:bg-orange-500 transition-colors duration-200">
+            <Settings className="w-7 h-7 text-orange-500 group-hover:text-white transition-colors duration-200" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-lg font-bold text-text-primary group-hover:text-orange-500 transition-colors">Admin Login</h2>
+            <p className="text-sm text-text-secondary mt-1 leading-relaxed">
+              Configure system settings, manage users, and clinic preferences.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 text-sm font-semibold text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             Continue <ChevronRight className="w-4 h-4" />
           </div>
         </Link>

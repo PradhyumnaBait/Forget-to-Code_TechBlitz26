@@ -121,7 +121,7 @@ export const staffLogin = async (
     const { username, password, role } = z.object({
       username: z.string(),
       password: z.string(),
-      role: z.enum(['doctor', 'reception']),
+      role: z.enum(['doctor', 'reception', 'admin']),
     }).parse(req.body);
 
     // DEMO MODE: Accept any username/password for staff login

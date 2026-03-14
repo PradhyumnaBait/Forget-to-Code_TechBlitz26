@@ -14,10 +14,10 @@ interface Patient {
 interface AuthContextType {
   token: string | null
   patient: Patient | null
-  staffRole: 'doctor' | 'reception' | null
+  staffRole: 'doctor' | 'reception' | 'admin' | null
   isAuthenticated: boolean
   loginPatient: (token: string, patient: Patient) => void
-  loginStaff: (role: 'doctor' | 'reception') => void
+  loginStaff: (role: 'doctor' | 'reception' | 'admin') => void
   logout: () => void
   refreshProfile: () => Promise<void>
 }
@@ -27,13 +27,13 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [patient, setPatient] = useState<Patient | null>(null)
-  const [staffRole, setStaffRole] = useState<'doctor' | 'reception' | null>(null)
+  const [staffRole, setStaffRole] = useState<'doctor' | 'reception' | 'admin' | null>(null)
 
   // Hydrate from localStorage on mount
   useEffect(() => {
     const t = localStorage.getItem('md_token')
     const p = localStorage.getItem('md_patient_data')
-    const s = localStorage.getItem('md_staff_role') as 'doctor' | 'reception' | null
+    const s = localStorage.getItem('md_staff_role') as 'doctor' | 'reception' | 'admin' | null
     if (t) setToken(t)
     if (p) {
       try { setPatient(JSON.parse(p)) } catch { /* ignore */ }
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStaffRole(null)
   }, [])
 
-  const loginStaff = useCallback((role: 'doctor' | 'reception') => {
+  const loginStaff = useCallback((role: 'doctor' | 'reception' | 'admin') => {
     localStorage.setItem('md_staff_role', role)
     setStaffRole(role)
     setToken(null)

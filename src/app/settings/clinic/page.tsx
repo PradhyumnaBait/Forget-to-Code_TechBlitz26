@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Building2, MapPin, Phone, Mail, DollarSign, Save, ExternalLink } from 'lucide-react'
 import { settingsApi } from '@/lib/api'
+import { useSettings } from '@/lib/settingsContext'
 
 interface ClinicSettings {
   id?: string
@@ -15,6 +16,7 @@ interface ClinicSettings {
 }
 
 export default function ClinicSettingsPage() {
+  const { updateClinicSettings } = useSettings()
   const [settings, setSettings] = useState<ClinicSettings>({
     clinicName: '',
     address: '',
@@ -51,7 +53,9 @@ export default function ClinicSettingsPage() {
     try {
       const response = await settingsApi.updateClinic(settings)
       if (response.success) {
-        setMessage('Clinic settings saved successfully!')
+        // Update the global settings context
+        updateClinicSettings(settings)
+        setMessage('Clinic settings saved successfully! Changes will be reflected across the website.')
         setTimeout(() => setMessage(''), 3000)
       }
     } catch (error) {

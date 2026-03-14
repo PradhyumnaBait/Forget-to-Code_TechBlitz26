@@ -231,7 +231,6 @@ export const updateBillingSettings = async (
   try {
     const schema = z.object({
       defaultConsultationFee: z.number().positive().optional(),
-      taxPercentage: z.number().min(0).max(100).optional(),
       currency: z.string().optional(),
       paymentMethods: z.array(z.string()).optional(),
       autoGenerateInvoice: z.boolean().optional(),

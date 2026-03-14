@@ -3,6 +3,7 @@ import './globals.css'
 import AppHeader from '@/components/layout/AppHeader'
 import FloatingAI from '@/components/layout/FloatingAI'
 import { AuthProvider } from '@/lib/authContext'
+import { SettingsProvider } from '@/lib/settingsContext'
 
 export const metadata: Metadata = {
   title: 'MedDesk — Smart Clinic Appointment System',
@@ -19,9 +20,11 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-brand-bg min-h-screen font-sans">
         <AuthProvider>
-          <AppHeader />
-          <main>{children}</main>
-          <FloatingAI />
+          <SettingsProvider>
+            <AppHeader />
+            <main>{children}</main>
+            <FloatingAI />
+          </SettingsProvider>
         </AuthProvider>
       </body>
     </html>

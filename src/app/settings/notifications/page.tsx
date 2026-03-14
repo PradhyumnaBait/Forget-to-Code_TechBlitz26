@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Bell, Save, MessageCircle, Mail, Smartphone } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Bell, Save, MessageSquare, Mail, Smartphone } from 'lucide-react'
 import { settingsApi } from '@/lib/api'
 
 interface NotificationSettings {
@@ -19,7 +19,7 @@ export default function NotificationSettingsPage() {
     smsEnabled: true,
     emailEnabled: true,
     reminderTime: 24,
-    confirmationEnabled: true,
+    confirmationEnabled: true
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -45,7 +45,7 @@ export default function NotificationSettingsPage() {
   const handleSave = async () => {
     setSaving(true)
     setMessage('')
-
+    
     try {
       const response = await settingsApi.updateNotifications(settings)
       if (response.success) {
@@ -60,11 +60,7 @@ export default function NotificationSettingsPage() {
     }
   }
 
-  const handleToggle = (field: keyof NotificationSettings) => {
-    setSettings(prev => ({ ...prev, [field]: !prev[field] as any }))
-  }
-
-  const handleChange = (field: keyof NotificationSettings, value: number) => {
+  const handleChange = (field: keyof NotificationSettings, value: boolean | number) => {
     setSettings(prev => ({ ...prev, [field]: value }))
   }
 
@@ -90,7 +86,7 @@ export default function NotificationSettingsPage() {
             Notification Settings
           </h2>
           <p className="text-text-secondary mt-1">
-            Configure automated WhatsApp, SMS and email notifications
+            Configure automated messages and reminders
           </p>
         </div>
         <button
@@ -104,165 +100,186 @@ export default function NotificationSettingsPage() {
       </div>
 
       {message && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            message.includes('success')
-              ? 'bg-success-light text-success-text border border-success/20'
-              : 'bg-danger-light text-danger-text border border-danger/20'
-          }`}
-        >
+        <div className={`mb-6 p-4 rounded-lg ${
+          message.includes('success') 
+            ? 'bg-success-light text-success-text border border-success/20' 
+            : 'bg-danger-light text-danger-text border border-danger/20'
+        }`}>
           {message}
         </div>
       )}
 
-      <div className="space-y-6">
-        {/* Channels */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="border border-brand-border rounded-lg p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center">
-                <MessageCircle className="w-4 h-4 text-green-600" />
+      <div className="space-y-8">
+        {/* Communication Channels */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4">Communication Channels</h3>
+          <div className="space-y-4">
+            {/* WhatsApp */}
+            <div className="flex items-center justify-between p-4 border border-brand-border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-text-primary">WhatsApp Notifications</div>
+                  <div className="text-sm text-text-secondary">Send appointment reminders via WhatsApp</div>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-text-primary">WhatsApp Notifications</p>
-                <p className="text-xs text-text-secondary">
-                  Appointment confirmations and reminders on WhatsApp.
-                </p>
-              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={settings.whatsappEnabled}
+                  onChange={(e) => handleChange('whatsappEnabled', e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </label>
             </div>
-            <button
-              type="button"
-              onClick={() => handleToggle('whatsappEnabled')}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.whatsappEnabled ? 'bg-primary' : 'bg-slate-200'
-              }`}
-            >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                  settings.whatsappEnabled ? 'translate-x-5' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
 
-          <div className="border border-brand-border rounded-lg p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center">
-                <Smartphone className="w-4 h-4 text-blue-600" />
+            {/* SMS */}
+            <div className="flex items-center justify-between p-4 border border-brand-border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Smartphone className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-text-primary">SMS Notifications</div>
+                  <div className="text-sm text-text-secondary">Send appointment reminders via SMS</div>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-text-primary">SMS Reminders</p>
-                <p className="text-xs text-text-secondary">
-                  Simple text reminders for upcoming appointments.
-                </p>
-              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={settings.smsEnabled}
+                  onChange={(e) => handleChange('smsEnabled', e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </label>
             </div>
-            <button
-              type="button"
-              onClick={() => handleToggle('smsEnabled')}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.smsEnabled ? 'bg-primary' : 'bg-slate-200'
-              }`}
-            >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                  settings.smsEnabled ? 'translate-x-5' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
 
-          <div className="border border-brand-border rounded-lg p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center">
-                <Mail className="w-4 h-4 text-indigo-600" />
+            {/* Email */}
+            <div className="flex items-center justify-between p-4 border border-brand-border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-text-primary">Email Notifications</div>
+                  <div className="text-sm text-text-secondary">Send appointment confirmations via email</div>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-text-primary">Email Confirmations</p>
-                <p className="text-xs text-text-secondary">
-                  Detailed confirmation emails with clinic details.
-                </p>
-              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={settings.emailEnabled}
+                  onChange={(e) => handleChange('emailEnabled', e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </label>
             </div>
-            <button
-              type="button"
-              onClick={() => handleToggle('emailEnabled')}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.emailEnabled ? 'bg-primary' : 'bg-slate-200'
-              }`}
-            >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                  settings.emailEnabled ? 'translate-x-5' : 'translate-x-1'
-                }`}
-              />
-            </button>
           </div>
         </div>
 
-        {/* Reminder config */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="label">Reminder Time (hours before appointment)</label>
-            <select
-              className="input"
-              value={settings.reminderTime}
-              onChange={(e) => handleChange('reminderTime', parseInt(e.target.value))}
-            >
-              <option value={1}>1 hour before</option>
-              <option value={2}>2 hours before</option>
-              <option value={6}>6 hours before</option>
-              <option value={12}>12 hours before</option>
-              <option value={24}>24 hours before</option>
-            </select>
-            <p className="text-xs text-text-muted mt-1">
-              Controls when reminder messages are sent to patients.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between border border-brand-border rounded-lg p-4">
-            <div>
-              <p className="font-medium text-text-primary">Send Confirmation Messages</p>
-              <p className="text-xs text-text-secondary">
-                Automatically send confirmation when an appointment is booked.
-              </p>
+        {/* Reminder Settings */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4">Reminder Settings</h3>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Reminder Time</label>
+                <select
+                  className="input"
+                  value={settings.reminderTime}
+                  onChange={(e) => handleChange('reminderTime', parseInt(e.target.value))}
+                >
+                  <option value={1}>1 hour before</option>
+                  <option value={2}>2 hours before</option>
+                  <option value={4}>4 hours before</option>
+                  <option value={12}>12 hours before</option>
+                  <option value={24}>24 hours before</option>
+                  <option value={48}>48 hours before</option>
+                </select>
+                <p className="text-xs text-text-muted mt-1">
+                  When to send appointment reminders
+                </p>
+              </div>
+              <div className="flex items-center gap-3 p-4 border border-brand-border rounded-lg">
+                <input
+                  type="checkbox"
+                  id="confirmationEnabled"
+                  className="w-4 h-4 text-primary bg-white border-brand-border rounded focus:ring-primary focus:ring-2"
+                  checked={settings.confirmationEnabled}
+                  onChange={(e) => handleChange('confirmationEnabled', e.target.checked)}
+                />
+                <div>
+                  <label htmlFor="confirmationEnabled" className="font-medium text-text-primary cursor-pointer">
+                    Booking Confirmations
+                  </label>
+                  <p className="text-xs text-text-muted">
+                    Send confirmation when appointment is booked
+                  </p>
+                </div>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => handleToggle('confirmationEnabled')}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.confirmationEnabled ? 'bg-primary' : 'bg-slate-200'
-              }`}
-            >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                  settings.confirmationEnabled ? 'translate-x-5' : 'translate-x-1'
-                }`}
-              />
-            </button>
+          </div>
+        </div>
+
+        {/* Message Templates Preview */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4">Message Templates</h3>
+          <div className="space-y-4">
+            <div className="p-4 bg-brand-bg border border-brand-border rounded-lg">
+              <div className="text-sm font-medium text-text-primary mb-2">Appointment Reminder</div>
+              <div className="text-sm text-text-secondary bg-white p-3 rounded border">
+                "Hi [Patient Name], this is a reminder for your appointment at MedDesk Clinic tomorrow at [Time]. Please arrive 10 minutes early. Reply CANCEL to cancel."
+              </div>
+            </div>
+            <div className="p-4 bg-brand-bg border border-brand-border rounded-lg">
+              <div className="text-sm font-medium text-text-primary mb-2">Booking Confirmation</div>
+              <div className="text-sm text-text-secondary bg-white p-3 rounded border">
+                "Your appointment has been confirmed for [Date] at [Time]. Consultation fee: ₹500. Address: [Clinic Address]. Thank you!"
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg text-sm">
-        <h3 className="font-semibold text-text-primary mb-2">Summary</h3>
-        <p className="text-text-secondary">
-          Reminders will be sent{' '}
-          <span className="font-semibold">{settings.reminderTime} hours</span> before each
-          appointment. Enabled channels:{' '}
-          <span className="font-semibold">
-            {[
-              settings.whatsappEnabled && 'WhatsApp',
-              settings.smsEnabled && 'SMS',
-              settings.emailEnabled && 'Email',
-            ]
-              .filter(Boolean)
-              .join(', ') || 'None'}
-          </span>
-          .
-        </p>
+      {/* Settings Summary */}
+      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg">
+        <h3 className="font-semibold text-text-primary mb-3">Active Notifications</h3>
+        <div className="flex flex-wrap gap-2">
+          {settings.whatsappEnabled && (
+            <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+              WhatsApp
+            </span>
+          )}
+          {settings.smsEnabled && (
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+              SMS
+            </span>
+          )}
+          {settings.emailEnabled && (
+            <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full">
+              Email
+            </span>
+          )}
+          {settings.confirmationEnabled && (
+            <span className="px-3 py-1 bg-primary-light text-primary text-sm rounded-full">
+              Confirmations
+            </span>
+          )}
+          {!settings.whatsappEnabled && !settings.smsEnabled && !settings.emailEnabled && (
+            <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
+              No notifications enabled
+            </span>
+          )}
+        </div>
+        <div className="mt-2 text-sm text-text-muted">
+          Reminders sent {settings.reminderTime} hours before appointments
+        </div>
       </div>
     </div>
   )
 }
-

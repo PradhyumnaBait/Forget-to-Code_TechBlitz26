@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { CreditCard, Save, IndianRupee, Wallet } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CreditCard, Save, DollarSign, Percent, Receipt } from 'lucide-react'
 import { settingsApi } from '@/lib/api'
 
 interface BillingSettings {
@@ -13,9 +13,10 @@ interface BillingSettings {
 }
 
 const PAYMENT_METHODS = [
-  { key: 'cash', label: 'Cash' },
-  { key: 'upi', label: 'UPI' },
-  { key: 'card', label: 'Card' },
+  { key: 'cash', label: 'Cash', icon: '💵' },
+  { key: 'upi', label: 'UPI', icon: '📱' },
+  { key: 'card', label: 'Card', icon: '💳' },
+  { key: 'netbanking', label: 'Net Banking', icon: '🏦' },
 ]
 
 export default function BillingSettingsPage() {
@@ -23,7 +24,7 @@ export default function BillingSettingsPage() {
     defaultConsultationFee: 500,
     currency: 'INR',
     paymentMethods: ['cash', 'upi', 'card'],
-    autoGenerateInvoice: true,
+    autoGenerateInvoice: true
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -34,13 +35,7 @@ export default function BillingSettingsPage() {
       try {
         const response = await settingsApi.getBilling()
         if (response.success && response.data) {
-          const d = response.data as any
-          setSettings({
-            defaultConsultationFee: Number(d.defaultConsultationFee) || 500,
-            currency: d.currency || 'INR',
-            paymentMethods: Array.isArray(d.paymentMethods) ? d.paymentMethods : ['cash', 'upi', 'card'],
-            autoGenerateInvoice: Boolean(d.autoGenerateInvoice !== false),
-          })
+          setSettings(response.data)
         }
       } catch (error) {
         console.error('Failed to fetch billing settings:', error)
@@ -55,7 +50,7 @@ export default function BillingSettingsPage() {
   const handleSave = async () => {
     setSaving(true)
     setMessage('')
-
+    
     try {
       const response = await settingsApi.updateBilling(settings)
       if (response.success) {
@@ -70,21 +65,27 @@ export default function BillingSettingsPage() {
     }
   }
 
-  const handleChange = (field: keyof BillingSettings, value: string | number | boolean) => {
+  const handleChange = (field: keyof BillingSettings, value: string | number | boolean | string[]) => {
     setSettings(prev => ({ ...prev, [field]: value }))
   }
 
-  const togglePaymentMethod = (method: string) => {
-    setSettings(prev => {
-      const exists = prev.paymentMethods.includes(method)
-      return {
-        ...prev,
-        paymentMethods: exists
-          ? prev.paymentMethods.filter(m => m !== method)
-          : [...prev.paymentMethods, method],
-      }
-    })
+  const handlePaymentMethodToggle = (method: string) => {
+    setSettings(prev => ({
+      ...prev,
+      paymentMethods: prev.paymentMethods.includes(method)
+        ? prev.paymentMethods.filter(m => m !== method)
+        : [...prev.paymentMethods, method]
+    }))
   }
+
+  // Calculate sample bill
+  const calculateSampleBill = () => {
+    const fee = settings.defaultConsultationFee
+    const total = fee
+    return { fee, total }
+  }
+
+  const sampleBill = calculateSampleBill()
 
   if (loading) {
     return (
@@ -99,8 +100,6 @@ export default function BillingSettingsPage() {
     )
   }
 
-  const total = settings.defaultConsultationFee
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -110,7 +109,7 @@ export default function BillingSettingsPage() {
             Billing Settings
           </h2>
           <p className="text-text-secondary mt-1">
-            Configure default consultation fee and accepted payment methods
+            Configure consultation fees and payment options
           </p>
         </div>
         <button
@@ -124,134 +123,156 @@ export default function BillingSettingsPage() {
       </div>
 
       {message && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            message.includes('success')
-              ? 'bg-success-light text-success-text border border-success/20'
-              : 'bg-danger-light text-danger-text border border-danger/20'
-          }`}
-        >
+        <div className={`mb-6 p-4 rounded-lg ${
+          message.includes('success') 
+            ? 'bg-success-light text-success-text border border-success/20' 
+            : 'bg-danger-light text-danger-text border border-danger/20'
+        }`}>
           {message}
         </div>
       )}
 
       <div className="space-y-8">
-        {/* Consultation fee */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="label">Default Consultation Fee</label>
-            <div className="relative">
-              <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-              <input
-                type="number"
-                className="input pl-9"
-                min={0}
-                value={settings.defaultConsultationFee}
-                onChange={(e) =>
-                  handleChange(
-                    'defaultConsultationFee',
-                    parseFloat(e.target.value) || 0
-                  )
-                }
-              />
+        {/* Fee Structure */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <DollarSign className="w-4 h-4" />
+            Fee Structure
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="label">Default Consultation Fee</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">₹</span>
+                <input
+                  type="number"
+                  className="input pl-8"
+                  min="0"
+                  step="50"
+                  value={settings.defaultConsultationFee}
+                  onChange={(e) => handleChange('defaultConsultationFee', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="label">Currency</label>
+              <select
+                className="input"
+                value={settings.currency}
+                onChange={(e) => handleChange('currency', e.target.value)}
+              >
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+              </select>
             </div>
           </div>
-
-          <div>
-            <label className="label">Currency</label>
-            <select
-              className="input"
-              value={settings.currency}
-              onChange={(e) => handleChange('currency', e.target.value)}
-            >
-              <option value="INR">INR (₹)</option>
-              <option value="USD">USD ($)</option>
-            </select>
-          </div>
         </div>
 
-        {/* Payment methods */}
+        {/* Payment Methods */}
         <div>
-          <h3 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
-            <Wallet className="w-4 h-4" />
-            Accepted Payment Methods
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {PAYMENT_METHODS.map((method) => {
-              const active = settings.paymentMethods.includes(method.key)
-              return (
-                <button
-                  key={method.key}
-                  type="button"
-                  onClick={() => togglePaymentMethod(method.key)}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                    active
-                      ? 'border-primary bg-primary-light text-primary'
-                      : 'border-brand-border bg-white text-text-secondary hover:bg-brand-bg'
-                  }`}
-                >
-                  <span className="text-sm font-medium">{method.label}</span>
-                  <span
-                    className={`w-4 h-4 rounded-full border ${
-                      active ? 'bg-primary border-primary' : 'border-brand-border'
-                    }`}
-                  />
-                </button>
-              )
-            })}
+          <h3 className="font-semibold text-text-primary mb-4">Accepted Payment Methods</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {PAYMENT_METHODS.map((method) => (
+              <div
+                key={method.key}
+                className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
+                  settings.paymentMethods.includes(method.key)
+                    ? 'border-primary bg-primary-light'
+                    : 'border-brand-border hover:border-primary/50'
+                }`}
+                onClick={() => handlePaymentMethodToggle(method.key)}
+              >
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 text-primary bg-white border-brand-border rounded focus:ring-primary focus:ring-2"
+                  checked={settings.paymentMethods.includes(method.key)}
+                  onChange={() => handlePaymentMethodToggle(method.key)}
+                />
+                <span className="text-xl">{method.icon}</span>
+                <span className="font-medium text-text-primary">{method.label}</span>
+              </div>
+            ))}
           </div>
-          <p className="text-xs text-text-muted mt-2">
-            These options will be shown in the billing and payment screens.
-          </p>
         </div>
 
-        {/* Invoice behaviour */}
-        <div className="flex items-center justify-between border border-brand-border rounded-lg p-4">
-          <div>
-            <p className="font-medium text-text-primary">Auto-generate Invoice</p>
-            <p className="text-sm text-text-secondary">
-              Automatically create an invoice when billing is confirmed.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() =>
-              handleChange('autoGenerateInvoice', !settings.autoGenerateInvoice)
-            }
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              settings.autoGenerateInvoice ? 'bg-primary' : 'bg-slate-200'
-            }`}
-          >
-            <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                settings.autoGenerateInvoice ? 'translate-x-5' : 'translate-x-1'
-              }`}
+        {/* Invoice Settings */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <Receipt className="w-4 h-4" />
+            Invoice Settings
+          </h3>
+          <div className="flex items-center gap-3 p-4 border border-brand-border rounded-lg">
+            <input
+              type="checkbox"
+              id="autoGenerateInvoice"
+              className="w-4 h-4 text-primary bg-white border-brand-border rounded focus:ring-primary focus:ring-2"
+              checked={settings.autoGenerateInvoice}
+              onChange={(e) => handleChange('autoGenerateInvoice', e.target.checked)}
             />
-          </button>
+            <div>
+              <label htmlFor="autoGenerateInvoice" className="font-medium text-text-primary cursor-pointer">
+                Auto-generate Invoices
+              </label>
+              <p className="text-xs text-text-muted">
+                Automatically create invoices when appointments are completed
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Preview */}
-      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg text-sm">
-        <h3 className="font-semibold text-text-primary mb-2">Preview</h3>
-        <p className="text-text-secondary">
-          Consultation fee:{' '}
-          <span className="font-semibold">
-            {settings.currency === 'INR' ? '₹' : '$'}
-            {(Number(settings.defaultConsultationFee) || 0).toFixed(2)}
-          </span>
-          . Accepted payments:{' '}
-          <span className="font-semibold">
-            {settings.paymentMethods.length
-              ? settings.paymentMethods
-                  .map((m) => PAYMENT_METHODS.find(pm => pm.key === m)?.label || m)
-                  .join(', ')
-              : 'None'}
-          </span>
-          .
-        </p>
+      {/* Sample Bill Preview */}
+      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg">
+        <h3 className="font-semibold text-text-primary mb-3">Sample Bill Preview</h3>
+        <div className="bg-white p-4 rounded border max-w-sm">
+          <div className="text-center mb-3">
+            <div className="font-bold text-text-primary">MedDesk Clinic</div>
+            <div className="text-xs text-text-muted">Invoice #INV-001</div>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Consultation Fee</span>
+              <span>₹{sampleBill.fee.toFixed(2)}</span>
+            </div>
+            <hr className="my-2" />
+            <div className="flex justify-between font-semibold">
+              <span>Total Amount</span>
+              <span>₹{sampleBill.total.toFixed(2)}</span>
+            </div>
+          </div>
+          <div className="mt-3 pt-2 border-t text-xs text-text-muted">
+            Payment Methods: {settings.paymentMethods.map(m => 
+              PAYMENT_METHODS.find(pm => pm.key === m)?.label
+            ).join(', ')}
+          </div>
+        </div>
+      </div>
+
+      {/* Settings Summary */}
+      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg">
+        <h3 className="font-semibold text-text-primary mb-3">Billing Summary</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <div className="text-text-muted">Consultation Fee</div>
+            <div className="font-medium text-text-primary">
+              ₹{settings.defaultConsultationFee}
+            </div>
+          </div>
+          <div>
+            <div className="text-text-muted">Payment Methods</div>
+            <div className="font-medium text-text-primary">
+              {settings.paymentMethods.length} enabled
+            </div>
+          </div>
+          <div>
+            <div className="text-text-muted">Auto Invoice</div>
+            <div className="font-medium text-text-primary">
+              {settings.autoGenerateInvoice ? 'Enabled' : 'Disabled'}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
-

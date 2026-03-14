@@ -19,7 +19,7 @@ import { authMiddleware, requireRole } from '../middlewares/authMiddleware';
 const router = Router();
 
 // All settings routes require admin authentication
-router.use(authMiddleware, requireRole(['ADMIN']));
+router.use(authMiddleware, requireRole(['admin', 'ADMIN']));
 
 // Get all settings at once
 router.get('/', getAllSettings);

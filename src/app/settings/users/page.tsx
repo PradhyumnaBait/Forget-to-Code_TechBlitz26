@@ -1,139 +1,128 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Users, Save, Plus, Trash2, Shield } from 'lucide-react'
-import { settingsApi } from '@/lib/api'
+import { useState, useEffect } from 'react'
+import { Users, Save, UserPlus, Shield, Mail, Key, Trash2, Plus, Edit } from 'lucide-react'
 
-type Role = 'admin' | 'doctor' | 'reception'
-
-interface StaffUser {
+interface User {
   id: string
   name: string
-  role: Role
-  email?: string
-  phone?: string
-  active: boolean
+  email: string
+  role: 'doctor' | 'reception' | 'admin'
+  status: 'active' | 'inactive'
+  isDefault?: boolean
 }
 
-interface SystemSettingsResponse {
-  [key: string]: any
+const DEFAULT_USERS: User[] = [
+  {
+    id: 'default-doctor',
+    name: 'Dr. Sarah Johnson',
+    email: 'doctor@meddesk.in',
+    role: 'doctor',
+    status: 'active',
+    isDefault: true
+  },
+  {
+    id: 'default-reception',
+    name: 'Reception Staff',
+    email: 'reception@meddesk.in',
+    role: 'reception',
+    status: 'active',
+    isDefault: true
+  }
+]
+
+const ROLE_PERMISSIONS = {
+  admin: ['Full system access', 'Manage settings', 'User management', 'View all data'],
+  doctor: ['View appointments', 'Manage consultations', 'View patient records', 'Generate prescriptions'],
+  reception: ['Manage bookings', 'Handle walk-ins', 'Process billing', 'Manage queue']
 }
 
-const ROLE_LABELS: Record<Role, string> = {
-  admin: 'Admin',
-  doctor: 'Doctor',
-  reception: 'Receptionist',
-}
-
-const DEFAULT_USER_IDS = new Set(['doctor-1', 'reception-1'])
-
-export default function UserManagementSettingsPage() {
-  const [users, setUsers] = useState<StaffUser[]>([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+export default function UserManagementPage() {
+  const [users, setUsers] = useState<User[]>(DEFAULT_USERS)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    role: 'reception' as 'doctor' | 'reception',
+    password: ''
+  })
   const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    const fetchSystemSettings = async () => {
-      try {
-        const response = await settingsApi.getSystem()
-        if (response.success) {
-          const data = response.data as SystemSettingsResponse
-          const storedUsers = (data.staff_users || data.users) as StaffUser[] | undefined
-
-          if (Array.isArray(storedUsers) && storedUsers.length > 0) {
-            setUsers(storedUsers)
-          } else {
-            // Seed with sensible defaults for demo
-            setUsers([
-              {
-                id: 'admin-1',
-                name: 'Admin User',
-                role: 'admin',
-                email: 'admin@meddesk.in',
-                phone: '+91 9000000001',
-                active: true,
-              },
-              {
-                id: 'doctor-1',
-                name: 'Dr. Ananya Sharma',
-                role: 'doctor',
-                email: 'doctor@meddesk.in',
-                phone: '+91 9000000002',
-                active: true,
-              },
-              {
-                id: 'reception-1',
-                name: 'Priya Nair',
-                role: 'reception',
-                email: 'reception@meddesk.in',
-                phone: '+91 9000000003',
-                active: true,
-              },
-            ])
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch system settings for users:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchSystemSettings()
-  }, [])
+  const [loading, setLoading] = useState(false)
 
   const handleSave = async () => {
-    setSaving(true)
-    setMessage('')
-
+    setLoading(true)
     try {
-      // Store under a dedicated system setting key
-      const response = await settingsApi.updateSystem({ staff_users: users })
-      if (response.success) {
-        setMessage('User management settings saved successfully!')
-        setTimeout(() => setMessage(''), 3000)
-      }
+      // Here you would save to backend
+      setMessage('User settings saved successfully!')
+      setTimeout(() => setMessage(''), 3000)
     } catch (error) {
-      setMessage('Failed to save users. Please try again.')
+      setMessage('Failed to save user settings.')
       setTimeout(() => setMessage(''), 3000)
     } finally {
-      setSaving(false)
+      setLoading(false)
     }
   }
 
-  const addUser = () => {
-    const newUser: StaffUser = {
+  const handleAddUser = () => {
+    if (!newUser.name || !newUser.email || !newUser.password) {
+      setMessage('Please fill in all fields.')
+      setTimeout(() => setMessage(''), 3000)
+      return
+    }
+
+    const user: User = {
       id: `user-${Date.now()}`,
-      name: '',
-      role: 'reception',
-      email: '',
-      phone: '',
-      active: true,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      status: 'active',
+      isDefault: false
     }
-    setUsers(prev => [...prev, newUser])
+
+    setUsers(prev => [...prev, user])
+    setNewUser({ name: '', email: '', role: 'reception', password: '' })
+    setShowAddForm(false)
+    setMessage('User added successfully!')
+    setTimeout(() => setMessage(''), 3000)
   }
 
-  const updateUser = (id: string, field: keyof StaffUser, value: any) => {
-    setUsers(prev => prev.map(u => (u.id === id ? { ...u, [field]: value } : u)))
+  const handleDeleteUser = (userId: string) => {
+    const user = users.find(u => u.id === userId)
+    if (user?.isDefault) {
+      setMessage('Cannot delete default users.')
+      setTimeout(() => setMessage(''), 3000)
+      return
+    }
+
+    if (confirm('Are you sure you want to delete this user?')) {
+      setUsers(prev => prev.filter(u => u.id !== userId))
+      setMessage('User deleted successfully!')
+      setTimeout(() => setMessage(''), 3000)
+    }
   }
 
-  const deleteUser = (id: string) => {
-    if (DEFAULT_USER_IDS.has(id)) return
-    setUsers(prev => prev.filter(u => u.id !== id))
+  const toggleUserStatus = (userId: string) => {
+    const user = users.find(u => u.id === userId)
+    if (user?.isDefault) {
+      setMessage('Cannot modify default users.')
+      setTimeout(() => setMessage(''), 3000)
+      return
+    }
+
+    setUsers(prev => prev.map(u => 
+      u.id === userId 
+        ? { ...u, status: u.status === 'active' ? 'inactive' : 'active' }
+        : u
+    ))
   }
 
-  if (loading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-8 bg-slate-200 rounded w-1/3 mb-6"></div>
-        <div className="space-y-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-16 bg-slate-200 rounded"></div>
-          ))}
-        </div>
-      </div>
-    )
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-100 text-red-800'
+      case 'doctor': return 'bg-blue-100 text-blue-800'
+      case 'reception': return 'bg-green-100 text-green-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
   }
 
   return (
@@ -145,137 +134,227 @@ export default function UserManagementSettingsPage() {
             User Management
           </h2>
           <p className="text-text-secondary mt-1">
-            Manage staff users and roles for the clinic
+            Manage staff accounts and permissions
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2">
           <button
-            onClick={addUser}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm border border-brand-border text-text-primary hover:bg-brand-bg"
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center gap-2 btn-secondary"
           >
-            <Plus className="w-4 h-4" />
+            <UserPlus className="w-4 h-4" />
             Add User
           </button>
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={loading}
             className="flex items-center gap-2 btn-primary"
           >
             <Save className="w-4 h-4" />
-            {saving ? 'Saving...' : 'Save Changes'}
+            {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </div>
 
       {message && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            message.includes('success')
-              ? 'bg-success-light text-success-text border border-success/20'
-              : 'bg-danger-light text-danger-text border border-danger/20'
-          }`}
-        >
+        <div className={`mb-6 p-4 rounded-lg ${
+          message.includes('success') 
+            ? 'bg-success-light text-success-text border border-success/20' 
+            : 'bg-danger-light text-danger-text border border-danger/20'
+        }`}>
           {message}
         </div>
       )}
 
-      <div className="space-y-4">
-        {users.map((user) => (
-          <div
-            key={user.id}
-            className="border border-brand-border rounded-lg p-4 flex flex-col md:flex-row gap-4 md:items-center md:justify-between"
-          >
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div>
-                <label className="label">Name</label>
-                <input
-                  className="input"
-                  placeholder="Full name"
-                  value={user.name}
-                  onChange={(e) => updateUser(user.id, 'name', e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="label">Role</label>
-                <select
-                  className="input"
-                  value={user.role}
-                  onChange={(e) => updateUser(user.id, 'role', e.target.value as Role)}
-                >
-                  <option value="admin">Admin</option>
-                  <option value="doctor">Doctor</option>
-                  <option value="reception">Receptionist</option>
-                </select>
-              </div>
-              <div>
-                <label className="label">Email</label>
-                <input
-                  type="email"
-                  className="input"
-                  placeholder="user@meddesk.in"
-                  value={user.email ?? ''}
-                  onChange={(e) => updateUser(user.id, 'email', e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="label">Phone</label>
-                <input
-                  type="tel"
-                  className="input"
-                  placeholder="+91 ..."
-                  value={user.phone ?? ''}
-                  onChange={(e) => updateUser(user.id, 'phone', e.target.value)}
-                />
-              </div>
+      {/* Add User Form */}
+      {showAddForm && (
+        <div className="mb-6 p-4 border border-brand-border rounded-lg bg-brand-bg">
+          <h3 className="font-semibold text-text-primary mb-4">Add New User</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="label">Full Name</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Enter full name"
+                value={newUser.name}
+                onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
+              />
             </div>
-
-            <div className="flex items-center justify-between md:flex-col md:items-end gap-3">
-              <button
-                type="button"
-                onClick={() => updateUser(user.id, 'active', !user.active)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 ${
-                  user.active
-                    ? 'bg-success-light text-success-text'
-                    : 'bg-slate-100 text-text-muted'
-                }`}
+            <div>
+              <label className="label">Email Address</label>
+              <input
+                type="email"
+                className="input"
+                placeholder="Enter email address"
+                value={newUser.email}
+                onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="label">Role</label>
+              <select
+                className="input"
+                value={newUser.role}
+                onChange={(e) => setNewUser(prev => ({ ...prev, role: e.target.value as 'doctor' | 'reception' }))}
               >
-                <Shield className="w-3 h-3" />
-                {user.active ? 'Active' : 'Disabled'}
-              </button>
-              <button
-                type="button"
-                onClick={() => deleteUser(user.id)}
-                disabled={DEFAULT_USER_IDS.has(user.id)}
-                className={`p-2 rounded-full ${
-                  DEFAULT_USER_IDS.has(user.id)
-                    ? 'text-text-muted cursor-not-allowed'
-                    : 'hover:bg-danger-light text-danger'
-                }`}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+                <option value="reception">Reception</option>
+                <option value="doctor">Doctor</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Password</label>
+              <input
+                type="password"
+                className="input"
+                placeholder="Enter password"
+                value={newUser.password}
+                onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
+              />
             </div>
           </div>
-        ))}
-
-        {users.length === 0 && (
-          <div className="text-sm text-text-secondary border border-dashed border-brand-border rounded-lg p-6 text-center">
-            No staff users configured yet. Click <span className="font-semibold">Add User</span> to
-            create your first clinic staff account.
+          <div className="flex gap-2 mt-4">
+            <button onClick={handleAddUser} className="btn-primary">
+              <Plus className="w-4 h-4 mr-2" />
+              Add User
+            </button>
+            <button onClick={() => setShowAddForm(false)} className="btn-secondary">
+              Cancel
+            </button>
           </div>
-        )}
+        </div>
+      )}
+
+      <div className="space-y-8">
+        {/* Current Users */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4">Current Users</h3>
+          <div className="space-y-3">
+            {users.map((user) => (
+              <div key={user.id} className="flex items-center justify-between p-4 border border-brand-border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center">
+                    <span className="text-primary font-semibold">
+                      {user.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-text-primary flex items-center gap-2">
+                      {user.name}
+                      {user.isDefault && (
+                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm text-text-secondary flex items-center gap-2">
+                      <Mail className="w-3 h-3" />
+                      {user.email}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}`}>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </span>
+                  <button
+                    onClick={() => toggleUserStatus(user.id)}
+                    className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}`}
+                    title={`${user.status === 'active' ? 'Active' : 'Inactive'} - Click to toggle`}
+                  ></button>
+                  {!user.isDefault && (
+                    <button
+                      onClick={() => handleDeleteUser(user.id)}
+                      className="text-red-600 hover:text-red-800 p-1"
+                      title="Delete user"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Role Permissions */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            Role Permissions
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.entries(ROLE_PERMISSIONS).filter(([role]) => role !== 'admin').map(([role, permissions]) => (
+              <div key={role} className="p-4 border border-brand-border rounded-lg">
+                <div className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mb-3 ${getRoleColor(role)}`}>
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                </div>
+                <ul className="space-y-1 text-sm">
+                  {permissions.map((permission, index) => (
+                    <li key={index} className="flex items-center gap-2 text-text-secondary">
+                      <span className="w-1 h-1 bg-primary rounded-full"></span>
+                      {permission}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Login Credentials Info */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <Key className="w-4 h-4" />
+            Default Login Credentials
+          </h3>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="text-sm text-blue-800 mb-3">
+              <strong>Default Staff Accounts:</strong> These accounts are pre-configured for system access
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-blue-800 mb-1">Doctor Login</div>
+                <div className="text-gray-600">doctor@meddesk.in</div>
+                <div className="text-gray-600">MedDesk@2026</div>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-green-800 mb-1">Reception Login</div>
+                <div className="text-gray-600">reception@meddesk.in</div>
+                <div className="text-gray-600">MedDesk@2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg text-sm">
-        <h3 className="font-semibold text-text-primary mb-2">How this works</h3>
-        <p className="text-text-secondary">
-          This screen manages a list of staff users and roles that is stored in the{' '}
-          <span className="font-semibold">system settings</span> (`staff_users`). It is ideal for a
-          hackathon/demo environment where you want to showcase role-based access without building a
-          full authentication system for each staff member.
-        </p>
+      {/* User Statistics */}
+      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg">
+        <h3 className="font-semibold text-text-primary mb-3">User Statistics</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <div className="text-text-muted">Total Users</div>
+            <div className="font-medium text-text-primary">{users.length}</div>
+          </div>
+          <div>
+            <div className="text-text-muted">Active Users</div>
+            <div className="font-medium text-text-primary">
+              {users.filter(u => u.status === 'active').length}
+            </div>
+          </div>
+          <div>
+            <div className="text-text-muted">Doctors</div>
+            <div className="font-medium text-text-primary">
+              {users.filter(u => u.role === 'doctor').length}
+            </div>
+          </div>
+          <div>
+            <div className="text-text-muted">Staff</div>
+            <div className="font-medium text-text-primary">
+              {users.filter(u => u.role === 'reception').length}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
-

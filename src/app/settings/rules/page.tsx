@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { FileText, Save } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { FileText, Save, Users, Clock, Calendar } from 'lucide-react'
 import { settingsApi } from '@/lib/api'
 
-interface AppointmentRulesSettings {
+interface RulesSettings {
   id?: string
   maxAppointmentsPerDay: number
   allowWalkIns: boolean
@@ -13,13 +13,13 @@ interface AppointmentRulesSettings {
   advanceBookingDays: number
 }
 
-export default function AppointmentRulesSettingsPage() {
-  const [settings, setSettings] = useState<AppointmentRulesSettings>({
+export default function AppointmentRulesPage() {
+  const [settings, setSettings] = useState<RulesSettings>({
     maxAppointmentsPerDay: 40,
     allowWalkIns: true,
     cancellationTimeLimit: 2,
     rescheduleLimit: 3,
-    advanceBookingDays: 30,
+    advanceBookingDays: 30
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -45,7 +45,7 @@ export default function AppointmentRulesSettingsPage() {
   const handleSave = async () => {
     setSaving(true)
     setMessage('')
-
+    
     try {
       const response = await settingsApi.updateRules(settings)
       if (response.success) {
@@ -60,7 +60,7 @@ export default function AppointmentRulesSettingsPage() {
     }
   }
 
-  const handleChange = (field: keyof AppointmentRulesSettings, value: string | number | boolean) => {
+  const handleChange = (field: keyof RulesSettings, value: string | number | boolean) => {
     setSettings(prev => ({ ...prev, [field]: value }))
   }
 
@@ -69,7 +69,7 @@ export default function AppointmentRulesSettingsPage() {
       <div className="animate-pulse">
         <div className="h-8 bg-slate-200 rounded w-1/3 mb-6"></div>
         <div className="space-y-4">
-          {[...Array(4)].map((_, i) => (
+          {[...Array(5)].map((_, i) => (
             <div key={i} className="h-16 bg-slate-200 rounded"></div>
           ))}
         </div>
@@ -86,7 +86,7 @@ export default function AppointmentRulesSettingsPage() {
             Appointment Rules
           </h2>
           <p className="text-text-secondary mt-1">
-            Control how appointments are booked, cancelled and rescheduled
+            Configure booking limits and appointment policies
           </p>
         </div>
         <button
@@ -100,124 +100,157 @@ export default function AppointmentRulesSettingsPage() {
       </div>
 
       {message && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            message.includes('success')
-              ? 'bg-success-light text-success-text border border-success/20'
-              : 'bg-danger-light text-danger-text border border-danger/20'
-          }`}
-        >
+        <div className={`mb-6 p-4 rounded-lg ${
+          message.includes('success') 
+            ? 'bg-success-light text-success-text border border-success/20' 
+            : 'bg-danger-light text-danger-text border border-danger/20'
+        }`}>
           {message}
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-8">
+        {/* Daily Limits */}
         <div>
-          <label className="label">Max Appointments Per Day</label>
-          <input
-            type="number"
-            className="input"
-            min={1}
-            value={settings.maxAppointmentsPerDay}
-            onChange={(e) =>
-              handleChange('maxAppointmentsPerDay', parseInt(e.target.value) || 1)
-            }
-          />
-          <p className="text-xs text-text-muted mt-1">
-            Limits the total number of appointments that can be booked per day.
-          </p>
+          <h3 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Daily Appointment Limits
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="label">Maximum Appointments Per Day</label>
+              <input
+                type="number"
+                className="input"
+                min="1"
+                max="100"
+                value={settings.maxAppointmentsPerDay}
+                onChange={(e) => handleChange('maxAppointmentsPerDay', parseInt(e.target.value) || 1)}
+              />
+              <p className="text-xs text-text-muted mt-1">
+                Total appointments allowed per day including walk-ins
+              </p>
+            </div>
+            <div className="flex items-center gap-3 p-4 border border-brand-border rounded-lg">
+              <input
+                type="checkbox"
+                id="allowWalkIns"
+                className="w-4 h-4 text-primary bg-white border-brand-border rounded focus:ring-primary focus:ring-2"
+                checked={settings.allowWalkIns}
+                onChange={(e) => handleChange('allowWalkIns', e.target.checked)}
+              />
+              <div>
+                <label htmlFor="allowWalkIns" className="font-medium text-text-primary cursor-pointer">
+                  Allow Walk-in Appointments
+                </label>
+                <p className="text-xs text-text-muted">
+                  Patients can visit without prior booking
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between border border-brand-border rounded-lg p-4">
-          <div>
-            <p className="font-medium text-text-primary">Allow Walk-in Patients</p>
-            <p className="text-sm text-text-secondary">
-              Enable reception to add patients without prior booking.
-            </p>
+        {/* Cancellation & Rescheduling */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Cancellation & Rescheduling
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="label">Cancellation Time Limit (hours)</label>
+              <select
+                className="input"
+                value={settings.cancellationTimeLimit}
+                onChange={(e) => handleChange('cancellationTimeLimit', parseInt(e.target.value))}
+              >
+                <option value={1}>1 hour before</option>
+                <option value={2}>2 hours before</option>
+                <option value={4}>4 hours before</option>
+                <option value={12}>12 hours before</option>
+                <option value={24}>24 hours before</option>
+              </select>
+              <p className="text-xs text-text-muted mt-1">
+                Minimum time required before appointment to cancel
+              </p>
+            </div>
+            <div>
+              <label className="label">Maximum Reschedules Allowed</label>
+              <select
+                className="input"
+                value={settings.rescheduleLimit}
+                onChange={(e) => handleChange('rescheduleLimit', parseInt(e.target.value))}
+              >
+                <option value={1}>1 reschedule</option>
+                <option value={2}>2 reschedules</option>
+                <option value={3}>3 reschedules</option>
+                <option value={5}>5 reschedules</option>
+                <option value={0}>Unlimited</option>
+              </select>
+              <p className="text-xs text-text-muted mt-1">
+                How many times a patient can reschedule the same appointment
+              </p>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => handleChange('allowWalkIns', !settings.allowWalkIns)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              settings.allowWalkIns ? 'bg-primary' : 'bg-slate-200'
-            }`}
-          >
-            <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                settings.allowWalkIns ? 'translate-x-5' : 'translate-x-1'
-              }`}
-            />
-          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Advance Booking */}
+        <div>
+          <h3 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Advance Booking
+          </h3>
           <div>
-            <label className="label">Cancellation Time Limit (hours)</label>
-            <input
-              type="number"
-              className="input"
-              min={1}
-              value={settings.cancellationTimeLimit}
-              onChange={(e) =>
-                handleChange('cancellationTimeLimit', parseInt(e.target.value) || 1)
-              }
-            />
-            <p className="text-xs text-text-muted mt-1">
-              How many hours before the appointment patients can cancel.
-            </p>
-          </div>
-
-          <div>
-            <label className="label">Reschedule Limit</label>
-            <input
-              type="number"
-              className="input"
-              min={0}
-              value={settings.rescheduleLimit}
-              onChange={(e) =>
-                handleChange('rescheduleLimit', parseInt(e.target.value) || 0)
-              }
-            />
-            <p className="text-xs text-text-muted mt-1">
-              Maximum number of times a single appointment can be rescheduled.
-            </p>
-          </div>
-
-          <div>
-            <label className="label">Advance Booking Window (days)</label>
-            <input
-              type="number"
-              className="input"
-              min={1}
+            <label className="label">Advance Booking Days</label>
+            <select
+              className="input max-w-xs"
               value={settings.advanceBookingDays}
-              onChange={(e) =>
-                handleChange('advanceBookingDays', parseInt(e.target.value) || 1)
-              }
-            />
+              onChange={(e) => handleChange('advanceBookingDays', parseInt(e.target.value))}
+            >
+              <option value={7}>1 week</option>
+              <option value={14}>2 weeks</option>
+              <option value={30}>1 month</option>
+              <option value={60}>2 months</option>
+              <option value={90}>3 months</option>
+            </select>
             <p className="text-xs text-text-muted mt-1">
-              How many days in advance patients can book appointments.
+              How far in advance patients can book appointments
             </p>
           </div>
         </div>
       </div>
 
-      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg text-sm">
-        <h3 className="font-semibold text-text-primary mb-2">Summary</h3>
-        <p className="text-text-secondary">
-          Up to <span className="font-semibold">{settings.maxAppointmentsPerDay}</span> appointments
-          can be booked per day.{' '}
-          {settings.allowWalkIns
-            ? 'Walk-in appointments are allowed.'
-            : 'Walk-in appointments are disabled.'}{' '}
-          Cancellations are allowed up to{' '}
-          <span className="font-semibold">{settings.cancellationTimeLimit} hours</span> before the
-          appointment, with a maximum of{' '}
-          <span className="font-semibold">{settings.rescheduleLimit}</span> reschedules. Patients
-          can book up to{' '}
-          <span className="font-semibold">{settings.advanceBookingDays} days</span> in advance.
-        </p>
+      {/* Rules Summary */}
+      <div className="mt-8 p-4 bg-brand-bg border border-brand-border rounded-lg">
+        <h3 className="font-semibold text-text-primary mb-3">Current Rules Summary</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+          <div>
+            <div className="text-text-muted">Max Daily Appointments</div>
+            <div className="font-medium text-text-primary">
+              {settings.maxAppointmentsPerDay} appointments
+            </div>
+          </div>
+          <div>
+            <div className="text-text-muted">Walk-ins</div>
+            <div className="font-medium text-text-primary">
+              {settings.allowWalkIns ? 'Allowed' : 'Not Allowed'}
+            </div>
+          </div>
+          <div>
+            <div className="text-text-muted">Cancellation Limit</div>
+            <div className="font-medium text-text-primary">
+              {settings.cancellationTimeLimit} hours before
+            </div>
+          </div>
+          <div>
+            <div className="text-text-muted">Advance Booking</div>
+            <div className="font-medium text-text-primary">
+              {settings.advanceBookingDays} days ahead
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
-
