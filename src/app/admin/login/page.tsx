@@ -10,8 +10,8 @@ export default function AdminLoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/settings'
-  const [email, setEmail] = useState('admin@meddesk.in')
-  const [password, setPassword] = useState('MedDesk@2026')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -26,7 +26,8 @@ export default function AdminLoginPage() {
         if (typeof window !== 'undefined') {
           localStorage.setItem('md_token', res.data.token)
         }
-        router.push(redirectTo)
+        // Force a page turn instead of client-side routing to guarantee fresh context loading for Settings Layout
+        window.location.href = redirectTo
       } else {
         setError('Invalid admin credentials')
       }
@@ -84,10 +85,6 @@ export default function AdminLoginPage() {
                 required
               />
             </div>
-            <p className="text-[11px] text-text-muted mt-1">
-              Default demo credentials: <span className="font-mono">admin@meddesk.in</span> /{' '}
-              <span className="font-mono">MedDesk@2026</span>
-            </p>
           </div>
 
           <button
