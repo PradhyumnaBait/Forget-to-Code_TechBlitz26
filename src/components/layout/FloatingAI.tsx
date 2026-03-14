@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { X, Send, Bot, Calendar, Search, XCircle, Clock, Sparkles } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { aiApi, ChatMessage } from '@/lib/api'
 
 const quickActions = [
@@ -25,6 +26,9 @@ export default function FloatingAI() {
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  const pathname = usePathname()
+  const isStaffRoute = pathname.startsWith('/doctor') || pathname.startsWith('/reception')
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -51,6 +55,8 @@ export default function FloatingAI() {
       setTyping(false)
     }
   }, [messages])
+
+  if (isStaffRoute) return null
 
   return (
     <>
