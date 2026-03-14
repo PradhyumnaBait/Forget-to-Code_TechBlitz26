@@ -263,8 +263,11 @@ export default function BillingPage() {
 
   const [received, setReceived] = useState('700')
   const [sent, setSent] = useState(false)
+  const [paidSuccess, setPaidSuccess] = useState(false)
+  const [paying, setPaying] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [patient, setPatient] = useState<PatientInfo>({ id: 'P001', name: 'Rahul Mehta', phone: '9876543210' })
+  const [sessionBills, setSessionBills] = useState<typeof recentBills>([...recentBills])
 
   const subtotal = items.reduce((acc, i) => acc + i.price * i.qty, 0)
   const discountAmt = Math.round(subtotal * discountPct / 100)
@@ -286,6 +289,28 @@ export default function BillingPage() {
 
   const handlePrint = () => window.print()
   const handleSendDigital = () => { setSent(true); setTimeout(() => setSent(false), 3000) }
+
+  const handleConfirmPayment = async () => {
+    setPaying(true)
+    try {
+      // Optimistic update — add to session's recent bills list
+      const now = new Date()
+      const clockTime = now.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true })
+      const newBill = { id: invoiceId, patient: patient.name, amt: `₹${total.toLocaleString()}`, time: clockTime }
+      setSessionBills(prev => [newBill, ...prev.slice(0, 9)]) // keep last 10 bills
+      setPaidSuccess(true)
+      setTimeout(() => {
+        setPaidSuccess(false)
+        // Reset form for next patient
+        setItems(DEFAULT_ITEMS)
+        setDiscountPct(0)
+        setPayMode('upi')
+        setReceived('700')
+      }, 3000)
+    } finally {
+      setPaying(false)
+    }
+  }
 
   // Auto-load patient + billing items from a completed appointment
   const handlePendingSelect = (sel: PendingBillItem) => {
@@ -486,7 +511,22 @@ export default function BillingPage() {
                 )}
 
                 <div className="space-y-2 mt-auto pt-2">
-                  <button onClick={handlePrint} className="w-full btn-primary py-2.5 flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform">
+                  <button
+                    onClick={handleConfirmPayment}
+                    disabled={paying || paidSuccess}
+                    className={`w-full py-3 flex items-center justify-center gap-2 font-extrabold text-sm rounded-xl shadow-md transition-all ${
+                      paidSuccess ? 'bg-success text-white scale-[1.02]' : 'bg-success hover:bg-success/90 text-white hover:-translate-y-0.5'
+                    } disabled:opacity-70`}
+                  >
+                    {paidSuccess ? (
+                      <><CheckCircle className="w-5 h-5" /> Payment Confirmed! ✓</>
+                    ) : paying ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing…</>
+                    ) : (
+                      <><IndianRupee className="w-5 h-5" /> Mark as Paid · ₹{total.toLocaleString()}</>
+                    )}
+                  </button>
+                  <button onClick={handlePrint} className="w-full btn-outline py-2.5 flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform text-sm">
                     <Printer className="w-4 h-4" /> Generate Bill & Print
                   </button>
                   <button onClick={handleSendDigital}
@@ -508,7 +548,7 @@ export default function BillingPage() {
                 <FileText className="w-4 h-4 text-text-muted" /> Recent Bills
               </h3>
               <div className="space-y-3">
-                {recentBills.map(bill => (
+                {sessionBills.map(bill => (
                   <div key={bill.id} className="p-3 bg-brand-bg rounded-lg border border-brand-border hover:border-text-muted transition-colors cursor-pointer">
                     <div className="flex justify-between items-start mb-1">
                       <span className="text-sm font-semibold text-text-primary">{bill.amt}</span>

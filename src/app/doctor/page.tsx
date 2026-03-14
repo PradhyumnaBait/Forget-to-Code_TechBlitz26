@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Calendar, CheckCircle2, AlertCircle, Clock, ChevronLeft, ChevronRight, FileText, UserPlus, Sparkles, TrendingUp, PhoneCall, Loader2, RefreshCw } from 'lucide-react'
@@ -33,6 +33,12 @@ export default function DoctorDashboard() {
   const dateStr = selectedDate.toISOString().split('T')[0]
   const displayDate = selectedDate.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' })
 
+  const isUrgent = (app: any) =>
+    typeof app?.symptoms === 'string' && /urgent/i.test(app.symptoms) ||
+    typeof app?.reason === 'string' && (app.reason.includes('🚨') || /urgent/i.test(app.reason))
+
+  const notifiedRef = useRef<Set<string>>(new Set())
+
   const load = useCallback(async () => {
     setLoading(true)
     try {
@@ -47,7 +53,24 @@ export default function DoctorDashboard() {
       
       if (aptsRes.status === 'fulfilled') {
         const data = aptsRes.value.data as any
-        setAppointments(data?.appointments ?? [])
+        const apts = data?.appointments ?? []
+        setAppointments(apts)
+        // Notify doctor of any urgent patients not yet notified
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+          Notification.requestPermission().then(perm => {
+            if (perm === 'granted') {
+              apts.forEach((a: any) => {
+                if (isUrgent(a) && !notifiedRef.current.has(a.id)) {
+                  notifiedRef.current.add(a.id)
+                  new Notification('🚨 Urgent Patient Alert — MedDesk', {
+                    body: `${a.patient?.name} at ${a.timeSlot} — ${a.symptoms ?? a.reason ?? 'Urgent Care'}`,
+                    icon: '/logo.png',
+                  })
+                }
+              })
+            }
+          })
+        }
       }
       if (isDateToday && queueRes.status === 'fulfilled') setQueueData((queueRes.value as any)?.data)
       else setQueueData(null)
@@ -260,15 +283,26 @@ export default function DoctorDashboard() {
                     {isPast && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                     {isActive && <div className="w-2 h-2 bg-white rounded-full animate-pulse" />}
                   </div>
-                  <div className={`p-4 rounded-xl border transition-all ${isActive ? 'border-primary/50 bg-primary-light shadow-md scale-[1.02]' : 'border-brand-border bg-white hover:border-primary/30 hover:shadow-sm'}`}>
+                  <div className={`p-4 rounded-xl border transition-all ${
+                    isActive ? 'border-primary/50 bg-primary-light shadow-md scale-[1.02]'
+                    : isUrgent(app) ? 'border-danger/50 bg-danger-light shadow-sm'
+                    : 'border-brand-border bg-white hover:border-primary/30 hover:shadow-sm'
+                  }`}>
                     <div className="flex justify-between items-start mb-2">
-                      <span className={`text-sm font-extrabold ${isActive ? 'text-primary' : 'text-text-primary'}`}>{app.timeSlot}</span>
-                      <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${isPast ? 'bg-success-light text-success-text' : isActive ? 'bg-primary text-white' : 'bg-brand-bg text-text-muted'}`}>
-                        {app.status?.replace('_', ' ')}
-                      </span>
+                      <span className={`text-sm font-extrabold ${isActive ? 'text-primary' : isUrgent(app) ? 'text-danger' : 'text-text-primary'}`}>{app.timeSlot}</span>
+                      <div className="flex items-center gap-1.5">
+                        {isUrgent(app) && (
+                          <span className="text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-danger text-white flex items-center gap-1 animate-pulse">
+                            🚨 Urgent
+                          </span>
+                        )}
+                        <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${isPast ? 'bg-success-light text-success-text' : isActive ? 'bg-primary text-white' : 'bg-brand-bg text-text-muted'}`}>
+                          {app.status?.replace('_', ' ')}
+                        </span>
+                      </div>
                     </div>
                     <p className="text-sm font-bold text-text-primary">{app.patient?.name ?? '—'}</p>
-                    <p className="text-xs font-medium text-text-secondary mt-1 line-clamp-1">{app.symptoms ?? 'General'}</p>
+                    <p className={`text-xs font-semibold mt-1 line-clamp-1 ${isUrgent(app) ? 'text-danger' : 'text-text-secondary'}`}>{app.symptoms ?? app.reason ?? 'General'}</p>
                   </div>
                 </div>
               )

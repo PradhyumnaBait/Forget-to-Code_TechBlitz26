@@ -237,18 +237,26 @@ export default function WalkInPage() {
       }
 
       // Book the urgent/walk-in appointment
-      await bookingApi.walkIn({
+      const bookRes = await bookingApi.walkIn({
         patientName: name,
         patientPhone: `+91${phone}`,
         date: dateStr,
         timeSlot: timeSlot24,
-        reason: complaint ?? (priority === 'urgent' ? 'Urgent Care' : 'Walk-in Consultation'),
+        reason: complaint ?? (priority === 'urgent' ? '🚨 Urgent Care' : 'Walk-in Consultation'),
       })
 
       // Upsert patient details
       try {
         await patientApi.create({ name, phone: `+91${phone}`, age, gender })
       } catch { /* patient may already exist */ }
+
+      // Auto check-in for urgent patients (today only)
+      if (priority === 'urgent' && isToday) {
+        const newAppointmentId = (bookRes as any)?.data?.id
+        if (newAppointmentId) {
+          try { await queueApi.checkIn(newAppointmentId) } catch { /* best-effort */ }
+        }
+      }
 
       setBookedPatient({ name, slot: timeLabel ?? timeSlot24, rescheduledPatient: rescheduledName })
       setSuccess(true)
