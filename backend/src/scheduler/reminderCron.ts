@@ -91,6 +91,7 @@ export function startScheduler() {
       
       const deletedPatients = await prisma.patient.deleteMany({
         where: {
+          medicalHistory: 'DEMO_GUEST_SESSION',
           createdAt: {
             lt: twoHoursAgo
           }

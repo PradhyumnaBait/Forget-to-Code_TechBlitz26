@@ -83,7 +83,13 @@ export class OTPService {
         ...(realName ? { name: realName } : {}),
         ...(age ? { age } : {}),
       },
-      create: { phone, name: realName ?? 'New Patient', age },
+      create: { 
+        phone, 
+        name: realName ?? 'New Patient', 
+        age,
+        // Tag this patient so the 2-hour data cleanup cron knows it's a guest session
+        medicalHistory: 'DEMO_GUEST_SESSION'
+      },
     });
 
     const token = jwt.sign({ userId: patient.id }, env.JWT_SECRET, {
