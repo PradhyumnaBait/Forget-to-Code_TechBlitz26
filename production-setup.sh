@@ -39,9 +39,9 @@ OPENAI_API_KEY=your_openai_api_key
 
 # Staff Credentials (Consider moving to database)
 DOCTOR_USERNAME=doctor
-DOCTOR_PASSWORD=MedDesk@2026
+DOCTOR_PASSWORD="<Any Password>"
 RECEPTION_USERNAME=reception
-RECEPTION_PASSWORD=MedDesk@2026
+RECEPTION_PASSWORD="<Any Password>"
 EOF
 
 # Create Railway deployment config

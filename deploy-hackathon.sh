@@ -48,8 +48,8 @@ NEXT_PUBLIC_API_URL=/api
 ## Step 3: Test Demo
 - Visit your Vercel URL
 - Test patient booking: phone 9999999999, OTP 123456
-- Test doctor login: doctor@meddesk.in / MedDesk@2026
-- Test reception login: reception@meddesk.in / MedDesk@2026
+- Test doctor login: doctor@meddesk.in / <Any Password>
+- Test reception login: reception@meddesk.in / <Any Password>
 
 ## Your demo is ready! 🎉
 EOF

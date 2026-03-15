@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/authContext'
 
 // Hardcoded demo credentials for staff (doctor login)
 const DOCTOR_EMAIL = 'doctor@meddesk.in'
-const DOCTOR_PASSWORD = 'MedDesk@2026'
+const DOCTOR_PASSWORD = 'demo_password'
 
 export default function DoctorLoginPage() {
   const router = useRouter()
@@ -87,7 +87,7 @@ export default function DoctorLoginPage() {
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-3">
               <User className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-semibold text-green-800">Demo Doctor Credentials</span>
+              <span className="text-sm font-semibold text-green-800">Doctor Auto-Login</span>
             </div>
             
             <div className="space-y-3">
@@ -105,19 +105,7 @@ export default function DoctorLoginPage() {
                 </button>
               </div>
               
-              <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-green-100">
-                <div>
-                  <div className="text-xs text-green-600 font-medium">Password</div>
-                  <code className="text-sm font-mono text-green-900">{DOCTOR_PASSWORD}</code>
-                </div>
-                <button
-                  onClick={() => copyToClipboard(DOCTOR_PASSWORD, 'password')}
-                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-md transition-colors"
-                >
-                  {copiedPassword ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                  {copiedPassword ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
+              {/* Removed password copy box to prevent git leaks */}
             </div>
             
             <button

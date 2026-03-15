@@ -7,7 +7,7 @@ import { UserCog, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Copy, Check,
 import { useAuth } from '@/lib/authContext'
 
 const RECEPTION_EMAIL = 'reception@meddesk.in'
-const RECEPTION_PASSWORD = 'MedDesk@2026'
+const RECEPTION_PASSWORD = 'demo_password'
 
 export default function ReceptionLoginPage() {
   const router = useRouter()
@@ -87,7 +87,7 @@ export default function ReceptionLoginPage() {
           <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-3">
               <User className="w-4 h-4 text-purple-600" />
-              <span className="text-sm font-semibold text-purple-800">Demo Receptionist Credentials</span>
+              <span className="text-sm font-semibold text-purple-800">Receptionist Auto-Login</span>
             </div>
             
             <div className="space-y-3">
@@ -105,19 +105,7 @@ export default function ReceptionLoginPage() {
                 </button>
               </div>
               
-              <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-100">
-                <div>
-                  <div className="text-xs text-purple-600 font-medium">Password</div>
-                  <code className="text-sm font-mono text-purple-900">{RECEPTION_PASSWORD}</code>
-                </div>
-                <button
-                  onClick={() => copyToClipboard(RECEPTION_PASSWORD, 'password')}
-                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 rounded-md transition-colors"
-                >
-                  {copiedPassword ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                  {copiedPassword ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
+              {/* Removed password copy box to prevent git leaks */}
             </div>
             
             <button

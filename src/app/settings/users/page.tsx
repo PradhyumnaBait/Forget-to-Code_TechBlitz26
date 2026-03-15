@@ -315,12 +315,12 @@ export default function UserManagementPage() {
               <div className="bg-white p-3 rounded border">
                 <div className="font-medium text-blue-800 mb-1">Doctor Login</div>
                 <div className="text-gray-600">doctor@meddesk.in</div>
-                <div className="text-gray-600">MedDesk@2026</div>
+                <div className="text-gray-600">••••••••</div>
               </div>
               <div className="bg-white p-3 rounded border">
                 <div className="font-medium text-green-800 mb-1">Reception Login</div>
                 <div className="text-gray-600">reception@meddesk.in</div>
-                <div className="text-gray-600">MedDesk@2026</div>
+                <div className="text-gray-600">••••••••</div>
               </div>
             </div>
           </div>

@@ -159,8 +159,13 @@ export const adminLogin = async (
       })
       .parse(req.body);
 
-    const expectedUser = process.env.ADMIN_EMAIL || 'admin@meddesk.in';
-    const expectedPass = process.env.ADMIN_PASSWORD || 'MedDesk@2026';
+    const expectedUser = process.env.ADMIN_EMAIL;
+    const expectedPass = process.env.ADMIN_PASSWORD;
+
+    if (!expectedUser || !expectedPass) {
+      res.status(500).json(errorResponse('Server misconfiguration: Admin credentials not configured in environment'));
+      return;
+    }
 
     if (username !== expectedUser || password !== expectedPass) {
       res.status(401).json(errorResponse('Invalid admin credentials'));
