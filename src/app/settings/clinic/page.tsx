@@ -125,7 +125,7 @@ export default function ClinicSettingsPage() {
             type="text"
             className="input"
             placeholder="e.g. MedDesk Clinic"
-            value={settings.clinicName}
+            value={settings.clinicName || ''}
             onChange={(e) => handleChange('clinicName', e.target.value)}
           />
         </div>
@@ -137,7 +137,7 @@ export default function ClinicSettingsPage() {
             className="input resize-none"
             rows={3}
             placeholder="Enter clinic address"
-            value={settings.address}
+            value={settings.address || ''}
             onChange={(e) => handleChange('address', e.target.value)}
           />
         </div>
@@ -152,7 +152,7 @@ export default function ClinicSettingsPage() {
                 type="tel"
                 className="input pl-9"
                 placeholder="+91 9876543210"
-                value={settings.phone}
+                value={settings.phone || ''}
                 onChange={(e) => handleChange('phone', e.target.value)}
               />
             </div>
@@ -166,7 +166,7 @@ export default function ClinicSettingsPage() {
                 type="email"
                 className="input pl-9"
                 placeholder="info@meddesk.in"
-                value={settings.email}
+                value={settings.email || ''}
                 onChange={(e) => handleChange('email', e.target.value)}
               />
             </div>
@@ -182,7 +182,7 @@ export default function ClinicSettingsPage() {
               type="number"
               className="input pl-9"
               placeholder="500"
-              value={settings.consultationFee}
+              value={settings.consultationFee || 0}
               onChange={(e) => handleChange('consultationFee', parseFloat(e.target.value) || 0)}
             />
           </div>
@@ -200,7 +200,7 @@ export default function ClinicSettingsPage() {
               type="url"
               className="input pl-9 pr-10"
               placeholder="https://maps.google.com/..."
-              value={settings.locationLink}
+              value={settings.locationLink || ''}
               onChange={(e) => handleChange('locationLink', e.target.value)}
             />
             {settings.locationLink && (
