@@ -26,9 +26,9 @@ function AdminLoginForm() {
         // Reuse the same token storage key used across the app
         if (typeof window !== 'undefined') {
           localStorage.setItem('md_token', res.data.token)
+          // Force a page turn instead of client-side routing to guarantee fresh context loading for Settings Layout
+          window.location.href = redirectTo || '/settings'
         }
-        // Force a page turn instead of client-side routing to guarantee fresh context loading for Settings Layout
-        window.location.href = redirectTo || '/settings'
       } else {
         setError('Invalid admin credentials')
       }
