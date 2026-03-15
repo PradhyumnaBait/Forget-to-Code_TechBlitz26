@@ -3,7 +3,7 @@ services:
     name: meddesk-backend
     env: node
     plan: free # Requesting the free tier explicitly
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
