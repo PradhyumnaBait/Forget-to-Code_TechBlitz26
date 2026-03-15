@@ -28,6 +28,10 @@ export function createApp() {
   app.use('/api', generalLimiter);
 
   // ─── Health check ───
+  app.get('/', (_req, res) => {
+    res.send('🏥 MedDesk API is running successfully. Please connect a frontend application to use the endpoints under /api.');
+  });
+  
   app.get('/health', (_req, res) => {
     res.json({
       success: true,
