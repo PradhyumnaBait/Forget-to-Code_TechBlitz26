@@ -29,9 +29,9 @@ export default function AppHeader() {
           <div className="flex items-center gap-2 shrink-0">
             <Link
               href="/login"
-              className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1.5 rounded-lg hover:bg-brand-bg"
+              className="flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1.5 rounded-lg hover:bg-brand-bg shrink-0"
             >
-              <LogIn className="w-4 h-4" /> Login
+              <LogIn className="w-4 h-4 md:w-5 md:h-5" /> <span className="hidden sm:inline">Login</span>
             </Link>
             <Link
               href="/book/patient-details"
