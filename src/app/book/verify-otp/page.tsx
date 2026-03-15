@@ -30,26 +30,27 @@ export default function VerifyOtpPage() {
     const fetchCurrentOtp = async () => {
       if (!phone) return
       
-      // Only fetch demo OTP in development mode
-      if (process.env.NODE_ENV === 'development') {
-        try {
-          const response = await authApi.getCurrentOtp(phone)
-          if (response.success && response.data?.otp) {
-            setDemoOtp(response.data.otp)
-          }
-        } catch (error) {
-          // If we can't fetch the OTP, fall back to a demo OTP
-          console.log('Could not fetch current OTP, using demo OTP')
-          setDemoOtp('123456')
+      try {
+        const response = await authApi.getCurrentOtp(phone)
+        if (response.success && response.data?.otp) {
+          setDemoOtp(response.data.otp)
         }
-      } else {
-        // In production, don't show any demo OTP
-        setDemoOtp('')
+      } catch (error) {
+        // If we can't fetch the OTP, fall back to a demo OTP
+        console.log('Could not fetch current OTP, using fallback OTP')
+        setDemoOtp('123456')
       }
     }
 
     fetchCurrentOtp()
   }, [phone])
+
+  // Automatically fill the OTP as soon as we retrieve it for testing purposes
+  useEffect(() => {
+    if (demoOtp && demoOtp.length === 6) {
+      useDemoOtp()
+    }
+  }, [demoOtp])
 
   // Countdown timer
   useEffect(() => {
@@ -68,11 +69,11 @@ export default function VerifyOtpPage() {
     }
   }
 
-  const useDemoOtp = () => {
+  const useDemoOtp = useCallback(() => {
     const otpArray = demoOtp.split('')
     setOtp(otpArray)
     setError('')
-  }
+  }, [demoOtp])
 
   // Countdown timer
   useEffect(() => {
@@ -192,8 +193,8 @@ export default function VerifyOtpPage() {
           <p className="text-xs text-text-muted mt-1">OTP expires in 5 minutes</p>
         </div>
 
-        {/* Demo OTP Display for Testing - Only in Development */}
-        {process.env.NODE_ENV === 'development' && demoOtp && (
+        {/* Demo OTP Display for Testing */}
+        {demoOtp && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-2">
               <Terminal className="w-4 h-4 text-blue-600" />

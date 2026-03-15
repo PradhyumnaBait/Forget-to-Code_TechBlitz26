@@ -83,5 +83,27 @@ export function startScheduler() {
     }
   });
 
-  console.log('✅ Scheduler started (slot cleanup, 24h & 1h reminders)');
+  // ─── Hackathon Data Cleanup — runs every hour ───
+  // Automatically wipes test patients and appointments older than 2 hours
+  cron.schedule('0 * * * *', async () => {
+    try {
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+      
+      const deletedPatients = await prisma.patient.deleteMany({
+        where: {
+          createdAt: {
+            lt: twoHoursAgo
+          }
+        }
+      });
+      
+      if (deletedPatients.count > 0) {
+        console.log(`[Cron] Cleaned up ${deletedPatients.count} old test patient(s) and their cascading data`);
+      }
+    } catch (err) {
+      console.error('[Cron] Data cleanup error:', err);
+    }
+  });
+
+  console.log('✅ Scheduler started (slot cleanup, 24h & 1h reminders, test data cleanup)');
 }
