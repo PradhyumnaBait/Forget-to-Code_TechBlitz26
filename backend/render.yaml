@@ -3,6 +3,7 @@ services:
     name: meddesk-backend
     env: node
     plan: free # Requesting the free tier explicitly
+    rootDir: backend # Tell Render to run commands inside the 'backend' folder
     buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npm start
     envVars:
