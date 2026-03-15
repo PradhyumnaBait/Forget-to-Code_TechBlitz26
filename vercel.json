@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "installCommand": "npm install --legacy-peer-deps",
   "builds": [
     {
       "src": "package.json",
@@ -15,4 +16,5 @@
   "env": {
     "NODE_ENV": "production"
   }
-}
+}
+
