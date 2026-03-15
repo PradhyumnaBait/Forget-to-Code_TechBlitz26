@@ -319,7 +319,7 @@ function ConsultationContent() {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input type="text" placeholder="Dose (1-0-1)" value={m.dose} onChange={e => updateMed(i, 'dose', e.target.value)} className="text-xs font-medium border border-brand-border rounded-lg p-2 outline-none focus:border-primary bg-brand-bg" />
                         <div className="flex items-center gap-1 border border-brand-border rounded-lg p-2 bg-brand-bg focus-within:border-primary">
                           <input type="number" value={m.duration || ''} onChange={e => updateMed(i, 'duration', Number(e.target.value))} className="text-xs font-medium outline-none bg-transparent w-full" placeholder="Days" />

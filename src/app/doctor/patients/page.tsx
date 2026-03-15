@@ -68,9 +68,9 @@ function PatientsContent() {
   const v = selectedPatient?.vitals || { bp: '120/80', pulse: '75', temp: '98.6°F', spo2: '99%', weight: '70kg' } // Mock vitals if empty
 
   return (
-    <div className="p-6 flex gap-6 h-[calc(100vh-64px)] overflow-hidden">
-      {/* Patient list */}
-      <div className="w-72 shrink-0 flex flex-col gap-4 bg-white rounded-2xl border border-brand-border p-4 shadow-sm">
+    <div className="p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 h-auto md:h-[calc(100vh-64px)] overflow-hidden">
+      {/* Patient list (Hidden on mobile if a patient is selected) */}
+      <div className={`w-full md:w-72 shrink-0 flex flex-col gap-4 bg-white rounded-2xl border border-brand-border p-4 shadow-sm h-[calc(100vh-200px)] md:h-auto overflow-hidden ${selectedId ? 'hidden md:flex' : 'flex'}`}>
         <h1 className="text-xl font-extrabold text-text-primary">Patient Records</h1>
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -109,8 +109,14 @@ function PatientsContent() {
         </div>
       </div>
 
-      {/* Patient Record Panel */}
-      <div className="flex-1 min-w-0 flex flex-col overflow-hidden bg-white rounded-2xl border border-brand-border shadow-sm">
+      {/* Patient Record Panel (Hidden on mobile if NO patient is selected) */}
+      <div className={`flex-1 min-w-0 flex flex-col overflow-hidden bg-white rounded-2xl border border-brand-border shadow-sm h-[calc(100vh-140px)] md:h-auto ${!selectedId ? 'hidden md:flex' : 'flex'}`}>
+        {/* Mobile Back Button */}
+        <div className="md:hidden flex items-center p-3 border-b border-brand-border bg-brand-bg/50">
+          <button onClick={() => setSelectedId(null)} className="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover">
+             ← Back to Patients List
+          </button>
+        </div>
         {loadingPatient && selectedId ? (
           <div className="flex-1 flex items-center justify-center p-12 text-text-muted flex-col gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />

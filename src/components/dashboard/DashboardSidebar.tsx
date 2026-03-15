@@ -37,9 +37,9 @@ export default function DashboardSidebar({ role = 'reception' }: { role?: string
   const user = roleUsers[role] ?? roleUsers.reception
 
   return (
-    <aside className="w-60 bg-white border-r border-brand-border flex flex-col shrink-0 h-screen sticky top-0">
-      {/* Brand */}
-      <div className="flex items-center gap-2.5 px-4 py-4 border-b border-brand-border">
+    <aside className="fixed bottom-0 left-0 w-full bg-white border-t border-brand-border md:relative md:border-t-0 md:border-r md:w-60 flex flex-row md:flex-col shrink-0 h-16 md:h-[calc(100vh-64px)] z-50">
+      {/* Brand - hidden on mobile */}
+      <div className="hidden md:flex items-center gap-2.5 px-4 py-4 border-b border-brand-border">
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
           <Stethoscope className="w-4 h-4 text-white" />
         </div>
@@ -49,8 +49,8 @@ export default function DashboardSidebar({ role = 'reception' }: { role?: string
         </div>
       </div>
 
-      {/* User badge */}
-      <div className="px-4 py-3 border-b border-brand-border">
+      {/* User badge - hidden on mobile */}
+      <div className="hidden md:block px-4 py-3 border-b border-brand-border">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-accent-light rounded-full flex items-center justify-center text-xs font-bold text-accent">
             {user.initials}
@@ -63,25 +63,45 @@ export default function DashboardSidebar({ role = 'reception' }: { role?: string
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 flex flex-row md:flex-col px-2 md:px-3 py-2 md:py-4 gap-1 md:gap-0.5 overflow-x-auto md:overflow-y-auto no-scrollbar items-center md:items-stretch">
         {navItems.map(({ href, icon: Icon, label, exact }) => {
           const active = exact ? pathname === href : (pathname === href || pathname.startsWith(href + '/'))
+          const baseClass = "flex items-center rounded-lg transition-colors duration-200"
+          const mobileClass = "flex-col justify-center text-[10px] min-w-[72px] h-12"
+          const desktopClass = "md:flex-row md:justify-start md:text-sm md:py-2 md:px-3 md:min-w-0 md:h-auto md:w-full"
+          
           return (
-            <Link key={href} href={href} className={active ? 'sidebar-item-active' : 'sidebar-item'}>
-              <Icon className="w-4 h-4 shrink-0" />
-              {label}
+            <Link 
+              key={href} 
+              href={href} 
+              className={`${baseClass} ${mobileClass} ${desktopClass} ${
+                active 
+                  ? 'bg-primary/10 text-primary font-bold shadow-sm' 
+                  : 'text-text-secondary hover:bg-brand-bg hover:text-text-primary'
+              }`}
+            >
+              <Icon className={`shrink-0 ${active ? 'text-primary' : 'text-text-muted'} w-5 h-5 mb-1 md:mb-0 md:w-4 md:h-4 md:mr-3`} />
+              <span className="truncate w-full text-center md:text-left">{label}</span>
             </Link>
           )
         })}
       </nav>
 
-      {/* Bottom */}
-      <div className="px-3 py-4 border-t border-brand-border space-y-0.5">
-        <Link href="/settings" className="sidebar-item w-full">
-          <Settings className="w-4 h-4" /> Settings
+      {/* Bottom (Settings & Logout) */}
+      <div className="flex flex-row md:flex-col px-2 md:px-3 py-2 md:py-4 border-l md:border-l-0 md:border-t border-brand-border gap-1 md:gap-0.5 items-center md:items-stretch overflow-x-auto no-scrollbar">
+        <Link 
+          href="/settings" 
+          className="flex flex-col md:flex-row items-center justify-center md:justify-start text-[10px] md:text-sm min-w-[72px] md:min-w-0 h-12 md:h-auto md:py-2 md:px-3 rounded-lg text-text-secondary hover:bg-brand-bg hover:text-text-primary transition-colors"
+        >
+          <Settings className="w-5 h-5 md:w-4 md:h-4 shrink-0 mb-1 md:mb-0 md:mr-3 text-text-muted" /> 
+          <span>Settings</span>
         </Link>
-        <Link href="/" className="sidebar-item w-full text-danger hover:text-danger hover:bg-danger-light">
-          <LogOut className="w-4 h-4" /> Logout
+        <Link 
+          href="/" 
+          className="flex flex-col md:flex-row items-center justify-center md:justify-start text-[10px] md:text-sm min-w-[72px] md:min-w-0 h-12 md:h-auto md:py-2 md:px-3 rounded-lg text-danger hover:bg-danger-light transition-colors"
+        >
+          <LogOut className="w-5 h-5 md:w-4 md:h-4 shrink-0 mb-1 md:mb-0 md:mr-3" /> 
+          <span>Logout</span>
         </Link>
       </div>
     </aside>
