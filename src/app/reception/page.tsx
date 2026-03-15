@@ -115,12 +115,12 @@ export default function ReceptionDashboard() {
   return (
     <div className="p-6">
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 sm:gap-0">
         <div>
           <h1 className="text-xl font-bold text-text-primary">Good morning, Reception 👋</h1>
           <p className="text-sm text-text-secondary mt-0.5">{today} · Reception Dashboard</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           <button onClick={load} className="p-2 rounded-lg border border-brand-border bg-white hover:bg-brand-bg transition-colors" title="Refresh">
             <RefreshCw className={`w-4 h-4 text-text-secondary ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -131,7 +131,7 @@ export default function ReceptionDashboard() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {kpis.map(({ label, value, sub, subCls, icon: Icon, iconCls }) => (
           <div key={label} className="card p-4 flex items-start gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconCls}`}>
@@ -153,18 +153,18 @@ export default function ReceptionDashboard() {
           {/* Filter bar — date picker + search (same layout as Appointments page) */}
           <div className="flex flex-wrap gap-3 px-5 py-4 border-b border-brand-border items-center">
             {/* Date picker */}
-            <div className="flex items-center gap-2 border border-brand-border rounded-lg px-3 py-1.5 bg-white">
+            <div className="flex items-center gap-2 border border-brand-border rounded-lg px-3 py-1.5 bg-white shrink-0">
               <CalendarDays className="w-4 h-4 text-text-muted shrink-0" />
               <input
                 type="date"
                 value={dateFilter}
                 onChange={e => setDateFilter(e.target.value)}
-                className="text-sm text-text-primary outline-none bg-transparent"
+                className="text-sm text-text-primary outline-none bg-transparent w-full"
               />
             </div>
 
             {/* Search */}
-            <div className="relative flex-1 min-w-[200px]">
+            <div className="relative flex-1 min-w-[140px] sm:min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 className="input pl-9 h-9 text-sm w-full"

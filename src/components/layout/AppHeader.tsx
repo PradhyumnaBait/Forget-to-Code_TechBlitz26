@@ -29,13 +29,13 @@ export default function AppHeader() {
           <div className="flex items-center gap-2 shrink-0">
             <Link
               href="/login"
-              className="flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1.5 rounded-lg hover:bg-brand-bg shrink-0"
+              className="flex items-center gap-1.5 text-sm font-medium text-text-secondary border border-brand-border hover:border-text-primary hover:text-text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-brand-bg shrink-0"
             >
-              <LogIn className="w-4 h-4 md:w-5 md:h-5" /> <span className="hidden sm:inline">Login</span>
+              <LogIn className="w-4 h-4 md:w-5 md:h-5" /> <span>Login</span>
             </Link>
             <Link
               href="/book/patient-details"
-              className="flex items-center gap-1.5 btn-primary text-sm py-2 px-4 hover:scale-[1.02] transition-transform"
+              className="hidden sm:flex items-center gap-1.5 btn-primary text-sm py-2 px-4 hover:scale-[1.02] transition-transform"
             >
               <Calendar className="w-4 h-4" /> Book Appointment
             </Link>

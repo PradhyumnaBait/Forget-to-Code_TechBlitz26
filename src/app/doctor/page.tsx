@@ -133,20 +133,20 @@ export default function DoctorDashboard() {
   return (
     <div className="p-6">
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-6 border-b border-brand-border pb-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => changeDate(-1)} className="p-2 rounded-lg border border-brand-border bg-white hover:bg-brand-bg hover:text-primary transition-colors shadow-sm">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 border-b border-brand-border pb-4 gap-4 md:gap-0">
+        <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+          <button onClick={() => changeDate(-1)} className="p-2 rounded-lg border border-brand-border bg-white hover:bg-brand-bg hover:text-primary transition-colors shadow-sm shrink-0">
             <ChevronLeft className="w-5 h-5 text-text-secondary hover:text-primary" />
           </button>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold text-text-primary">Dr. Sharma's Schedule</h1>
-            <p className="text-sm text-primary font-medium">{displayDate} {isToday(selectedDate) && <span className="ml-2 badge-success text-[10px]">TODAY</span>}</p>
+          <div className="flex flex-col shrink-0">
+            <h1 className="text-lg md:text-xl font-bold text-text-primary">Dr. Sharma's Schedule</h1>
+            <p className="text-xs md:text-sm text-primary font-medium">{displayDate} {isToday(selectedDate) && <span className="ml-2 badge-success text-[10px]">TODAY</span>}</p>
           </div>
-          <button onClick={() => changeDate(1)} className="p-2 rounded-lg border border-brand-border bg-white hover:bg-brand-bg hover:text-primary transition-colors shadow-sm">
+          <button onClick={() => changeDate(1)} className="p-2 rounded-lg border border-brand-border bg-white hover:bg-brand-bg hover:text-primary transition-colors shadow-sm shrink-0">
             <ChevronRight className="w-5 h-5 text-text-secondary hover:text-primary" />
           </button>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
           <button onClick={load} className="p-2 rounded-lg border border-brand-border bg-white hover:bg-brand-bg shadow-sm" title="Refresh">
             <RefreshCw className={`w-5 h-5 text-text-secondary ${loading ? 'animate-spin text-primary' : ''}`} />
           </button>
@@ -159,7 +159,7 @@ export default function DoctorDashboard() {
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-3 gap-5 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
         <div className="card p-5 flex items-center gap-4 hover:shadow-md transition-shadow hover:border-primary/30 group">
           <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><UserPlus className="w-6 h-6 text-primary" /></div>
           <div className="flex-1 min-w-0">
@@ -203,23 +203,24 @@ export default function DoctorDashboard() {
               <div className="flex items-center gap-3 text-text-muted justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /> <span className="font-medium">Loading session...</span></div>
             ) : current ? (
               <>
-                <div className="flex items-start gap-5 mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-border">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-light to-primary-light flex items-center justify-center text-2xl font-extrabold text-accent shadow-inner">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-5 mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-border">
+                  <div className="w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br from-accent-light to-primary-light flex items-center justify-center text-2xl font-extrabold text-accent shadow-inner">
                     {initials(current.patient?.name ?? '')}
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-text-primary">{current.patient?.name} <span className="text-sm font-semibold text-text-muted ml-2 bg-brand-bg px-2 py-0.5 rounded-full">{current.patient?.age ?? '?'}{current.patient?.gender ?? ''}</span></h2>
-                    <div className="flex items-center gap-2 mt-2 text-sm text-text-secondary bg-warning-light/30 p-2 rounded-lg border border-warning/10 inline-flex">
-                      <AlertCircle className="w-4 h-4 text-warning" /> <span className="font-semibold text-text-primary">Chief Complaint:</span> {current.symptoms ?? 'General consultation'}
+                    <h2 className="text-xl md:text-2xl font-bold text-text-primary">{current.patient?.name} <span className="text-sm font-semibold text-text-muted ml-2 bg-brand-bg px-2 py-0.5 rounded-full">{current.patient?.age ?? '?'}{current.patient?.gender ?? ''}</span></h2>
+                    <div className="flex items-start md:items-center gap-2 mt-2 text-sm text-text-secondary bg-warning-light/30 p-2 rounded-lg border border-warning/10 inline-flex">
+                      <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5 md:mt-0" /> 
+                      <span><strong className="text-text-primary">Chief Complaint:</strong> {current.symptoms ?? 'General consultation'}</span>
                     </div>
                   </div>
                 </div>
-                <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-brand-border">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 pt-4 border-t border-brand-border">
                   <Link href={`/doctor/consultation?id=${current.id}`} className="btn-primary py-3 flex justify-center items-center gap-2 hover:shadow-lg transition-all text-sm uppercase tracking-wide font-bold">
-                    <FileText className="w-5 h-5" /> Open Consultation
+                    <FileText className="w-5 h-5 shrink-0" /> Open Consultation
                   </Link>
                   <Link href={`/doctor/patients?id=${current.patientId}`} className="btn-outline py-3 flex justify-center items-center gap-2 text-primary hover:bg-primary-light border-primary/30 text-sm uppercase tracking-wide font-bold transition-all">
-                    <Calendar className="w-5 h-5" /> Patient History
+                    <Calendar className="w-5 h-5 shrink-0" /> Patient History
                   </Link>
                 </div>
               </>
@@ -235,23 +236,23 @@ export default function DoctorDashboard() {
             <div className="card p-5 border-l-4 border-l-warning bg-gradient-to-r from-white to-warning-light/10 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-extrabold text-warning-text uppercase tracking-widest flex items-center gap-1.5">
-                  <Clock className="w-4 h-4" /> Next Up
+                  <Clock className="w-4 h-4 shrink-0" /> Next Up
                 </span>
                 <span className="badge-warning shadow-sm">Waiting</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white border-2 border-warning/20 flex items-center justify-center font-bold text-warning-text shadow-sm">
+                  <div className="w-12 h-12 shrink-0 rounded-xl bg-white border-2 border-warning/20 flex items-center justify-center font-bold text-warning-text shadow-sm">
                     {initials(nextUp.patient?.name ?? '')}
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-text-primary">{nextUp.patient?.name} <span className="text-xs font-semibold text-text-muted ml-2">{nextUp.patient?.age ?? '?'}{nextUp.patient?.gender ?? ''}</span></p>
-                    <p className="text-sm font-medium text-text-secondary mt-0.5">{nextUp.timeSlot} · {nextUp.symptoms ?? 'General'}</p>
+                    <p className="text-base md:text-lg font-bold text-text-primary">{nextUp.patient?.name} <span className="text-xs font-semibold text-text-muted ml-2">{nextUp.patient?.age ?? '?'}{nextUp.patient?.gender ?? ''}</span></p>
+                    <p className="text-xs md:text-sm font-medium text-text-secondary mt-0.5 line-clamp-1">{nextUp.timeSlot} · {nextUp.symptoms ?? 'General'}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => handleCallIn(nextUp.id)}
-                  className="text-sm font-bold text-white bg-primary px-5 py-2.5 rounded-xl hover:bg-primary-hover hover:shadow-md transition-all flex items-center gap-2"
+                  className="w-full sm:w-auto text-sm font-bold text-white bg-primary px-5 py-2.5 rounded-xl hover:bg-primary-hover hover:shadow-md transition-all flex items-center justify-center gap-2 shrink-0"
                 >
                   <PhoneCall className="w-4 h-4" /> Call In
                 </button>
