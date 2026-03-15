@@ -13,10 +13,24 @@ export function createApp() {
   app.use(helmet());
   app.use(
     cors({
-      origin: [env.FRONTEND_URL, 'http://localhost:3000', 'http://localhost:3002'],
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+        
+        const isVercel = origin.endsWith('vercel.app') || origin.endsWith('vercel.com');
+        const isLocalhost = origin.includes('localhost');
+        const isRender = origin.includes('onrender.com');
+
+        if (isVercel || isLocalhost || isRender || origin === env.FRONTEND_URL || origin === env.FRONTEND_URL?.replace(/\/$/, '')) {
+          callback(null, true);
+        } else {
+          console.error(`CORS Blocked: ${origin}`);
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with'],
     })
   );
 
